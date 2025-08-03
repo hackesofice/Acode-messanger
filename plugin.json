@@ -1,0 +1,20 @@
+{
+  "id":"hackesofice.messanger",
+  "name":"messanger",
+  "main":"main.js",
+  "version":"1.0.0",
+  "readme":"readme.md",
+  "icon":"icon.png",
+  "files": [],
+  "minVersionCode":290,
+  "license":"",
+  "changelogs":"changelogs.md",
+  "keywords":["Live Server","live","HTML Viewer"],
+  "price":10000,
+  "repository":"https://github.com/hackesofice/Acode-Browser.git",
+  "author":{
+    "name":"HACKESOFICE",
+    "email":"hackesofice@gmail.com",
+    "github":"hackesofice"
+  }
+}
