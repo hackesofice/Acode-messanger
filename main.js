@@ -1,14 +1,16 @@
 "use-strict";
 (() => {
     const sidebarApps = acode.require('sidebarApps');
-    const settings = acode.require('settings')
+    const tab_view = acode.require('editorFile');
+    const settings = acode.require('settings');
     const fs = acode.require('fs');
-    const SERVER_URL = 'https://1653616a-2346-44c4-9c4e-65317b7be6e9-00-qlzxlert3tu4.janeway.replit.dev';
+    const SERVER_URL = 'http://localhost:5000';//'https://acode-chat-backend.onrender.com/';
     let container_login_content = false;
 
     var menifest = {
         "id": "hackesofice.messanger"
     }
+    
 
     class messanger {
         constructor() { }
@@ -21,6 +23,12 @@
             await new Promise((resolve) => {
                 dynamicScript.onload = resolve;
             });
+            
+             acode.addIcon('messanger', `${this.baseUrl}icon.png`);
+            // await new Promise((resolve) => {
+            //     icon.onload = resolve;
+            // });
+            
 
             // when app starts or plugin is installed then 
             // now start and connect websocket if navigator.on is == true (means connected to internet)
@@ -41,11 +49,18 @@
             /////////////////////////////////////////////////////////////////////////
             async function try_sign_up(event, signup_form){
                 event.preventDefault();
+                const location = await fetch('https://ipinfo.io/json', {
+                    method: 'GET',
+                });
+                let location_data = await location.json();// ill extract data like city and ip from this response 
+                    // console.log(location_data)
                 const data = {
-                    "NAME": signup_form.querySelector('#name').value,
+                    "FIRST_NAME": signup_form.querySelector('#first_name').value,
+                    "LAST_NAME": signup_form.querySelector('#last_name').value,
                     "EMAIL": signup_form.querySelector('#email').value,
                     "PHONE_NO": signup_form.querySelector('#phone').value,
-                    "PASSWORD": signup_form.querySelector('#pass')
+                    "PASSWORD": signup_form.querySelector('#pass').value,
+                    "IP_INFO": location_data
                 }
                 
                 const response = await fetch(`${SERVER_URL}/sign_up`,{
@@ -53,9 +68,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    
                     body: JSON.stringify(data)
-                    
                 });
                 
                 console.log(await response.json());
@@ -123,7 +136,7 @@
                             hader.appendChild(p1);
                             
                     let body = document.createElement('fieldset');
-                        body.style.cssText = `width:95%; border:none; box-shadow:0 0 10px; border:1px solid black; margin-left:auto; margin-right:auto; margin-top: 20%;`;
+                        body.style.cssText = `max-width:90%; height:70%;border:none; box-shadow:0 0 10px;margin-left:auto; margin-right:auto; margin-top: 20%; padding:5%; border-radius:10px;`;
                         
                         let legend = document.createElement('legend');
                             legend.style.cssText = `margin-left:auto; margin-right:auto; padding:5px; box-shadow:0 0 10px; border-radius:10px`;
@@ -131,58 +144,93 @@
                             let legend_p = document.createElement('p');
                                 legend_p.id = 'legend_p';
                                 legend_p.style.cssText = ``;
-                                legend_p.innerText = ' Sign-up '
+                                legend_p.innerText = ' Sign-up ';
                                 legend.appendChild(legend_p);
                             body.appendChild(legend);
                         
                         let signup_form = document.createElement('form');
-                            signup_form.íd = 'singup_form';
+                            signup_form.id = 'singup_form';
+                            signup_form.classList = 'scroll';
+                            signup_form.style.cssText = `overflow-y:auto; height:100%; margin-left:auto; margin-right:auto;`;
                             signup_form.onsubmit = (event) => {try_sign_up(event, signup_form);}
                             
-                            let name = document.createElement('input');
-                                name.name = 'name';
-                                name.id = 'name';
-                                name.placeholder = 'Enter Your Name';
-                                signup_form.appendChild(name);
+                            let first_name = document.createElement('input');
+                                first_name.name = 'first_name';
+                                first_name.id = 'first_name';
+                                first_name.placeholder = 'Enter Your first Name';
+                                first_name.style.cssText = `height:70px;`;
+                                first_name.className = 'input';
+                                signup_form.appendChild(first_name);
+                            
+                            let last_name = document.createElement('input')
+                                last_name.name = 'last_name';
+                                last_name.id = 'last_name';
+                                last_name.placeholder = 'Enter your last name';
+                                last_name.className  = 'input';
+                                signup_form.appendChild(last_name);
                             
                             let email = document.createElement('input');
                                 email.type = 'email';
                                 email.name = 'email';
                                 email.id = 'email';
-                                email.placeholder = 'enter email'
+                                email.className = 'input';
+                                email.placeholder = 'enter email';
                                 signup_form.appendChild(email);
                             
                             let phone = document.createElement('input');
-                                phone.type = 'Number';
-                                phone.name = 'phone'
+                                phone.type = 'number';
+                                phone.name = 'phone';
                                 phone.id = 'phone';
-                                phone.placeholder = 'enter phone'
+                                phone.className = 'input';
+                                phone.placeholder = 'enter phone';
                                 signup_form.appendChild(phone);
                             
+                            let dob = document.createElement('input')
+                                dob.type = 'date'
+                                dob.name = 'dob';
+                                dob.placeholder = 'dd/mm/yy';
+                                signup_form.appendChild(dob)
+                            
                             let pw = document.createElement('input');
-                                pw.name = 'pass';
+                                pw.name = 'password';
                                 pw.type = 'password';
-                                pw.id = 'pass'
+                                pw.id = 'pass';
+                                pw.className = 'input';
                                 pw.placeholder = 'enter password';
                                 signup_form.appendChild(pw);
-                            
+                                
+                            let confirm_pw = document.createElement('input');
+                                confirm_pw.type = 'text';
+                                confirm_pw.id = 'confirm_pw';
+                                confirm_pw.className = 'input';
+                                confirm_pw.placeholder = 'Re Enter Your Password';
+                                signup_form.appendChild(confirm_pw);
                             
                             let submit = document.createElement('button');
                                 submit.type = 'submit';
                                 submit.innerText = 'Sign-Up';
                                 signup_form.appendChild(submit);
                             
-                            
-                                
-                                
-                                
-                                
-                                
-                                
                             body.appendChild(signup_form);
+                            
+                    let style = document.createElement('style');
+                        style.textContent = `
+                            .input{
+                                background-color:red;
+                            }
+                        `;
+                                
+                                
+                                
+                                
+                                
+                                
+                          
+                
                 
                 section.appendChild(hader);
-                section.appendChild(body)
+                section.appendChild(body);
+                section.appendChild(style);
                 return section
             }
             
@@ -209,7 +257,7 @@
 
                 let body = document.createElement('fieldset');
                 body.id = 'body';
-                body.style.cssText = `border: none; margin-top: 20px; border-radius: 10px; box-shadow:0 0 10px`;
+                body.style.cssText = `border: none; margin-top: 20px; border-radius: 10px; box-shadow:0 0 10px; max-width:92%; margin-left:auto; margin-right:auto;`;
                 let center_hader = document.createElement('legend');
                 center_hader.innerText = ' Login ';
                 center_hader.style.cssText = `margin:auto;padding:5px 12px; border-radius:40%; text-shadow: 0px 0px 3px; font-weight:900; font-size: 20px; letter-spacing:6px; box-shadow: 0 0 10px;`;
@@ -275,6 +323,7 @@
 
             function show_chats(CHATS_OBJECT) {
                 let section = document.createElement('section');
+                section.style.cssText = 'height:96%;';
                 section.id = 'main_screen';
 
                 let hader = document.createElement('fieldset');
@@ -287,8 +336,8 @@
                 hader.appendChild(legend);
 
                 let body = document.createElement('fieldset');
-                body.className = 'scroll';
-                body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; max-height:62%; overflow-y:auto;`;
+               // body.className = 'scroll';
+                body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
 
                 let legend2 = document.createElement('legend');
                 legend2.innerText = ' CHATS ';
@@ -297,16 +346,26 @@
 
                 /// now use the foreach loop to show the chats
                 let aside = document.createElement('aside');
-                aside.style.cssText = ``;
+                aside.className = 'scroll';
+                aside.style.cssText = `overflow-y:auto; height:100%`;
                 let list = document.createElement('ul');
-                list.className = 'scroll';
-                list.style.cssText = `overflow-y:auto;height:100%; padding-bottom: 15px;`;
+                list.className = '';
+                list.style.cssText = `padding-bottom: 12px;`;
+                aside.appendChild(list);
                 Object.keys(CHATS_OBJECT).forEach(key => {
                     let list_item = document.createElement('li');
                     list_item.id = key;
                     //list_item.innerText = CHATS_OBJECT[key]['name'];
                     list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
+                    list_item.addEventListener('click', ()=>{
+                        //list_item.style.cssText ="background-color:blue";
 
+                        if (window.editorManager.getFile('messanger_tab', 'id')){
+                            window.editorManager.getFile('messanger_tab', 'id').remove();
+                        }
+                        console.log(key, CHATS_OBJECT[key]['name'])
+                        open_chat(key,CHATS_OBJECT[key]['name'])
+                    })
                     let name_text = document.createElement('p');
                     name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
                     name_text.innerText = CHATS_OBJECT[key]['name'];
@@ -314,10 +373,10 @@
 
                     list.appendChild(list_item);
                 });
-                aside.appendChild(list);
+                
                 body.appendChild(aside);
                 let style = document.createElement('style');
-                style.textContent = `fieldset::-webkit-scrollbar{display:none; color:blue;}`;
+                style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
 
                 section.appendChild(style);
                 section.appendChild(hader);
@@ -345,7 +404,8 @@
             function fire_socket(container) {
                 document.addEventListener('o', () => { console.log('im online') })
 
-                container.style.cssText = `border: 0px solid;box-shadow: 0 0 10px; border-radius:10px;`;
+                container.style.cssText = `border: 0px solid;box-shadow: 0 0 10px; border-radius:10px;height:96%; max-width:98%;margin-top:3.5%; overflow-y:auto;`;
+                //container.className = 'scroll';
                 let socket = io.connect(SERVER_URL);
                 socket.on('connect', () => {
                     console.log("connected ✓✓✓  gatherring  chats");
@@ -372,8 +432,16 @@
                                                 // Object.keys(response.chats).forEach(key =>{
                                                 //     console.log(key, ' ===> ', CHATS[key]['name'])
                                                 // });
-                                                //container.innerHtml = '';
+                                                //container.removeChild(container.innerHtml)
+                                                // Array.from(container.innerHtml).forEach((element)=>{
+                                                //     container.removeChild(element);
+                                                // });
+                                                // console.log(container.innerHtml);
+                                                if (container.querySelector('#section')){
+                                                    container.removeChild(container.querySelector('#section'));
+                                                }
                                                 container.appendChild(show_chats(response.chats));
+                                                
                                                 // now ill call a functioj using forEach loop which will show the chats list om sidebar
                                             } else {
                                                 // means have token but not able to get the chats even we have token
@@ -393,7 +461,7 @@
                                         }
                                         const u = container.querySelector('#signup_page_gate');
                                         u.addEventListener('click', () => {
-                                            container.innerHtml = '';
+                                            // container.innerHtml = '';
                                             let removing_section = container.querySelector('#section');
                                             container.removeChild(removing_section);
                                             container.appendChild(sign_up_page());
@@ -408,7 +476,7 @@
                                 }
                                 const u = container.querySelector('#signup_page_gate');
                                 u.addEventListener('click', () => {
-                                    container.innerHtml = '';
+                                    // container.innerHtml = '';
                                     let removing_section = container.querySelector('#section');
                                     container.removeChild(removing_section);
                                     container.appendChild(sign_up_page());
@@ -421,7 +489,7 @@
                             }
                             const u = container.querySelector('#signup_page_gate');
                             u.addEventListener('click', () => {
-                                container.innerHtml = '';
+                                // container.innerHtml = '';
                                 let removing_section = container.querySelector('#section');
                                 container.removeChild(removing_section);
                                 container.appendChild(sign_up_page());
@@ -448,7 +516,7 @@
                     }
                     const u = container.querySelector('#signup_page_gate');
                     u.addEventListener('click', () => {
-                        container.innerHtml = '';
+                        // container.innerHtml = '';
                         let removing_section = container.querySelector('#section');
                         container.removeChild(removing_section);
                         container.appendChild(sign_up_page());
@@ -461,7 +529,7 @@
                     }
                     const u = container.querySelector('#signup_page_gate');
                     u.addEventListener('click', () => {
-                        container.innerHtml = '';
+                        // container.innerHtml = '';
                         let removing_section = container.querySelector('#section');
                         container.removeChild(removing_section);
                         container.appendChild(sign_up_page());
@@ -517,9 +585,30 @@
                 true, //first positon or mot
                 runfunctionWhenSelected // run somethin in background
             );
-            // console.log(sidebarApps)
-
-            //console.log(this)
+            
+            
+            ///////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////
+            ////////////////  function for appending new tab  /////////////
+            ///////////////////////////////////////////////////////////////
+            ///////////////////////////////////////////////////////////////
+            function open_chat(id, name){
+                const tab = new tab_view(name, {
+                    type: 'custom',
+                    id: 'messanger_tab',
+                    tabIcon: 'icon messanger',
+                    content: "dive content variable/ function",
+                    stylesheets: '/static/style.css',
+                    hideQuickTools: true,
+                    render: true
+                    
+                });
+                // setTimeout(()=>{
+                //     console.log(window.editorManager.getFile('messanger_tab', 'id').remove())
+                // //   const tab = tab_view.getFile('messanger_tab', 'id');
+                // //         tab.remove();
+                // }, 4000)
+            }
         }
         async uninstall() { sidebarApps.remove('chats') }
     }
