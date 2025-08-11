@@ -4,7 +4,7 @@
     const tab_view = acode.require('editorFile');
     const settings = acode.require('settings');
     const fs = acode.require('fs');
-    const SERVER_URL = 'http://localhost:5000';//'https://acode-chat-backend.onrender.com/';
+    const SERVER_URL = 'https://acode-chat-backend.onrender.com';
     let container_login_content = false;
 
     var menifest = {
@@ -138,7 +138,7 @@
             
             
             
-            async function try_login(event, login_form) {
+            async function try_login(event, login_form, container_refrence) {
                 event.preventDefault();
                 let btn = login_form.querySelector('#pass');
                 btn.disabled = true;
@@ -169,6 +169,7 @@
                                 COOKIE: data.COOKIE
                             }
                         });
+                        show_chats(container_refrence, data.UID, data.TOKEN)
                         console.log(data)
                         // fire_socket() //contaimer isnt accessible so its useless
                     } else {
@@ -203,7 +204,7 @@
                                     console.log(responseData)
                                     return responseData.TOKEN
                                 }else{
-                                    //console.log(response);
+                                    console.log(await response.json());
                                     return false
                                 }
                             }else{
@@ -401,7 +402,7 @@
                 let login_form = document.createElement('form');
                 // login_form.id = 'login_form';
                 // login_form.action = 'https://google.com/';
-                login_form.onsubmit = (event) => { try_login(event, login_form) }
+                login_form.onsubmit = (event) => { try_login(event, login_form, container_refrence) }
                 body.appendChild(login_form);
 
                 let email_input = document.createElement('input');
@@ -474,7 +475,7 @@
                             console.log('get all message socket endpoint respomse', response)
                             if (response.status_code == 200) {
                                 while(container_refrence.firstChild){
-                                    container_refrence.removeChild(firstChild);
+                                    container_refrence.removeChild(container_refrence.firstChild);
                                 }
                                 let section = document.createElement('section');
                                 section.style.cssText = 'height:96%;';
@@ -506,6 +507,7 @@
                                 list.className = '';
                                 list.style.cssText = `padding-bottom: 12px;`;
                                 aside.appendChild(list);
+                                const CHATS_OBJECT = response.chats;
                                 Object.keys(response.chats).forEach(key => {
                                     let list_item = document.createElement('li');
                                     list_item.id = key;
@@ -517,12 +519,12 @@
                                         if (window.editorManager.getFile('messanger_tab', 'id')) {
                                             window.editorManager.getFile('messanger_tab', 'id').remove();
                                         }
-                                        console.log(key, CHATS_OBJECT[key]['name'])
-                                        open_chat(key, CHATS_OBJECT[key]['name'])
+                                        console.log(key, CHATS_OBJECT[key]['NAME'])
+                                        open_chat(key, CHATS_OBJECT[key]['NAME'])
                                     })
                                     let name_text = document.createElement('p');
                                     name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
-                                    name_text.innerText = CHATS_OBJECT[key]['name'];
+                                    name_text.innerText = CHATS_OBJECT[key]['NAME'];
                                     list_item.appendChild(name_text);
 
                                     list.appendChild(list_item);
@@ -538,6 +540,7 @@
 
                                 console.log(section);
                                 container_refrence.appendChild(section);
+                                start_listening_for_new_messages(container_refrence)
                             } else {
                                 alert(response.message);
                                 show_login_page(container_refrence);
@@ -549,7 +552,11 @@
                 }
             }
 
-
+            function start_listening_for_new_messages(container_refrence){
+                socket.on('new_message', (data) => {
+                    alert(data);
+                });
+            }
 
 
 
