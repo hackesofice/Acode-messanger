@@ -47,7 +47,7 @@
             /////////////////// LETS DESIGN THE LOGIN UI PAGE ///////////////////////
             /////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////
-            async function try_sign_up(event, signup_form, body){
+            async function try_sign_up(event, signup_form, container_refrence){
                 event.preventDefault();
                 const location = await fetch('https://ipinfo.io/json', {
                     method: 'GET',
@@ -83,9 +83,9 @@
                                 UID: responseData.UID
                             }
                         });
-                        console.log(body);
+                        console.log(container_refrence);
                         /////////////// pass the body and append otp ///////////
-                        show_otp_page(body)
+                        show_otp_page(container_refrence)
                     }
                     else{
                         console.log(responseData.message)
@@ -96,7 +96,7 @@
                 }
                 
             }
-            async function submit_otp(event, otp_form){
+            async function submit_otp(event, otp_form, container_refrence){
                 event.preventDefault();
                 let ENTERD_OTP = otp_form.querySelector('#otp_input').value;
                 let UID = settings.get(menifest.id).UID
@@ -121,7 +121,9 @@
                         if (response.ok) {
                             const responseData = await response.json()
                             console.log(responseData);
-                            otp_form.querySelector('#err_p').innerText = responseData.message;
+                            otp_form.querySelector('#err_p').innerText = responseData.message
+                            console.log(responseData.TOKEN)
+                            show_chats(container_refrence, UID, responseData.TOKEN)
                         } else {
                             const responseData = await response.json()
                             console.log(responseData);
@@ -198,9 +200,10 @@
                                 });
                                 if (response.ok){
                                     const responseData = await response.json();
+                                    console.log(responseData)
                                     return responseData.TOKEN
                                 }else{
-                                    console.log(response);
+                                    //console.log(response);
                                     return false
                                 }
                             }else{
@@ -218,15 +221,17 @@
                 }
             }
 
-            function show_otp_page(body){
-                body.removeChild(body.querySelector('#singup_form'));
-                body.querySelector('#legend_p').innerText = 'Verification';
-                
+            function show_otp_page(container_refrence){
+              //  body.removeChild(body.querySelector('#singup_form'));
+              //  body.querySelector('#legend_p').innerText = 'Verification';
+                while (container_refrence.firstChild){
+                    container_refrence.removeChild(container_refrence.firstChild);
+                }
                 let otp_form = document.createElement('form');
                     otp_form.id = 'otp_form';
                     otp_form.style.cssText = `margin:auto; margin-top: 30%; `;
-                    otp_form.onsubmit = (event) => {submit_otp(event, otp_form)}
-                    body.appendChild(otp_form)
+                    otp_form.onsubmit = (event) => {submit_otp(event, otp_form, container_refrence)}
+                    container_refrence.appendChild(otp_form)
                     
                     let otp_box = document.createElement('input');
                         otp_box.id = 'otp_input';
@@ -244,10 +249,12 @@
                     let err_p = document.createElement('span');
                         err_p.id = 'err_p';
                         otp_form.appendChild(err_p);
+                        
+                container_refrence.appendChild(otp_form)
             }
             
             
-            function sign_up_page() {
+            function sign_up_page(container_refrence) {
                 let section = document.createElement('section');
                     section.id = 'section';
 
@@ -280,7 +287,7 @@
                             signup_form.id = 'singup_form';
                             signup_form.classList = 'scroll';
                             signup_form.style.cssText = `overflow-y:auto; height:100%; margin-left:auto; margin-right:auto;`;
-                            signup_form.onsubmit = (event) => {try_sign_up(event, signup_form,body);}
+                            signup_form.onsubmit = (event) => {try_sign_up(event, signup_form,container_refrence);}
                             
                             let first_name = document.createElement('input');
                                 first_name.name = 'first_name';
@@ -353,14 +360,20 @@
                 section.appendChild(hader);
                 section.appendChild(body);
                 section.appendChild(style);
-                return section
+                
+                /// clar the container
+                while (container_refrence.firstChild){
+                    console.log('clearing')
+                    container_refrence.removeChild(container_refrence.firstChild);
+                }
+                container_refrence.appendChild(section)
             }
             
             
             
             
             
-            function show_login_page() {
+            function show_login_page(container_refrence) {
                 let section = document.createElement('section');
                 section.id = 'section'
 
@@ -424,6 +437,7 @@
                 let p = document.createElement('p');
                 p.style.cssText = `text-align: center; margin-bottom:50px`;
                 p.innerHTML = "Don't have an account ? <u id='signup_page_gate'> Create Account </u> hear ";
+                p.addEventListener('click', ()=>{sign_up_page(container_refrence)})
                 login_form.appendChild(p);
 
                 let style = document.createElement('style');
@@ -439,78 +453,100 @@
                 section.appendChild(style);
                 section.appendChild(hader);
                 section.appendChild(body);
-                return section
+                
+                console.log('Showing Conyainer refrence', container_refrence)
+                //clear contaoner
+                while (container_refrence.firstChild){
+                    console.log('clearing')
+                    container_refrence.removeChild(container_refrence.firstChild);
+                }
+                container_refrence.appendChild(section);
+                return true
             }
 
 
-            function show_chats(container_refrence) {
+            function show_chats(container_refrence, UID, TOKEN) {
                 let socket = io.connect(SERVER_URL);
-                socket.on('connect', () => {
-                    socket.emit('get_all_messages', { "UID": UID, "TOKEN": TOKEN }, (response) => {
-                        let section = document.createElement('section');
-                        section.style.cssText = 'height:96%;';
-                        section.id = 'main_screen';
-
-                        let hader = document.createElement('fieldset');
-                        hader.id = 'chats_hader';
-                        hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
-
-                        let legend = document.createElement('legend');
-                        legend.innerText = 'Welcome M.R';
-                        legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
-                        hader.appendChild(legend);
-
-                        let body = document.createElement('fieldset');
-                        // body.className = 'scroll';
-                        body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
-
-                        let legend2 = document.createElement('legend');
-                        legend2.innerText = ' CHATS ';
-                        legend2.style.cssText = `margin-left:auto; margin-right:auto; padding:5px;`;
-                        body.appendChild(legend2);
-
-                        /// now use the foreach loop to show the chats
-                        let aside = document.createElement('aside');
-                        aside.className = 'scroll';
-                        aside.style.cssText = `overflow-y:auto; height:100%`;
-                        let list = document.createElement('ul');
-                        list.className = '';
-                        list.style.cssText = `padding-bottom: 12px;`;
-                        aside.appendChild(list);
-                        Object.keys(response.chats).forEach(key => {
-                            let list_item = document.createElement('li');
-                            list_item.id = key;
-                            //list_item.innerText = CHATS_OBJECT[key]['name'];
-                            list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
-                            list_item.addEventListener('click', () => {
-                                //list_item.style.cssText ="background-color:blue";
-
-                                if (window.editorManager.getFile('messanger_tab', 'id')) {
-                                    window.editorManager.getFile('messanger_tab', 'id').remove();
+                // const PLUGIN_SETINGS = settings.get([menifest.id]);
+                try {
+                    socket.on('connect', () => {
+                        socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
+                            console.log('get all message socket endpoint respomse', response)
+                            if (response.status_code == 200) {
+                                while(container_refrence.firstChild){
+                                    container_refrence.removeChild(firstChild);
                                 }
-                                console.log(key, CHATS_OBJECT[key]['name'])
-                                open_chat(key, CHATS_OBJECT[key]['name'])
-                            })
-                            let name_text = document.createElement('p');
-                            name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
-                            name_text.innerText = CHATS_OBJECT[key]['name'];
-                            list_item.appendChild(name_text);
+                                let section = document.createElement('section');
+                                section.style.cssText = 'height:96%;';
+                                section.id = 'main_screen';
 
-                            list.appendChild(list_item);
+                                let hader = document.createElement('fieldset');
+                                hader.id = 'chats_hader';
+                                hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
+
+                                let legend = document.createElement('legend');
+                                legend.innerText = 'Welcome M.R';
+                                legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
+                                hader.appendChild(legend);
+
+                                let body = document.createElement('fieldset');
+                                // body.className = 'scroll';
+                                body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
+
+                                let legend2 = document.createElement('legend');
+                                legend2.innerText = ' CHATS ';
+                                legend2.style.cssText = `margin-left:auto; margin-right:auto; padding:5px;`;
+                                body.appendChild(legend2);
+
+                                /// now use the foreach loop to show the chats
+                                let aside = document.createElement('aside');
+                                aside.className = 'scroll';
+                                aside.style.cssText = `overflow-y:auto; height:100%`;
+                                let list = document.createElement('ul');
+                                list.className = '';
+                                list.style.cssText = `padding-bottom: 12px;`;
+                                aside.appendChild(list);
+                                Object.keys(response.chats).forEach(key => {
+                                    let list_item = document.createElement('li');
+                                    list_item.id = key;
+                                    //list_item.innerText = CHATS_OBJECT[key]['name'];
+                                    list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
+                                    list_item.addEventListener('click', () => {
+                                        //list_item.style.cssText ="background-color:blue";
+
+                                        if (window.editorManager.getFile('messanger_tab', 'id')) {
+                                            window.editorManager.getFile('messanger_tab', 'id').remove();
+                                        }
+                                        console.log(key, CHATS_OBJECT[key]['name'])
+                                        open_chat(key, CHATS_OBJECT[key]['name'])
+                                    })
+                                    let name_text = document.createElement('p');
+                                    name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
+                                    name_text.innerText = CHATS_OBJECT[key]['name'];
+                                    list_item.appendChild(name_text);
+
+                                    list.appendChild(list_item);
+                                });
+
+                                body.appendChild(aside);
+                                let style = document.createElement('style');
+                                style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
+
+                                section.appendChild(style);
+                                section.appendChild(hader);
+                                section.appendChild(body);
+
+                                console.log(section);
+                                container_refrence.appendChild(section);
+                            } else {
+                                alert(response.message);
+                                show_login_page(container_refrence);
+                            }
                         });
-
-                        body.appendChild(aside);
-                        let style = document.createElement('style');
-                        style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
-
-                        section.appendChild(style);
-                        section.appendChild(hader);
-                        section.appendChild(body);
-
-                        console.log(section);
-                        container_refrence.appendChild(section);
                     });
-                });
+                } catch (err) {
+                    console.log(err)
+                }
             }
 
 
@@ -521,13 +557,18 @@
 
 
 
-            function run_main(container_refrence){
-                const TOKEN = try_cookie_login();
+            async function run_main(container_refrence){
+                console.log('youre online now')
+                const TOKEN = await try_cookie_login();
                 const UID = settings.get(menifest.id).UID;
-                    if(login_status && UID){
+             //   console.log(TOKEN)
+                    if(TOKEN && UID){
+                        console.log('showing chats')
+                        //console.log(UID, TOKEN)
                         // means we have token
-                       show_chats(container_refrence)
+                       show_chats(container_refrence, UID, TOKEN)
                     }else{
+                        console.log('login please');
                         // means auto login not completed
                         // pass container_refrence on show_login_page function
                         show_login_page(container_refrence);
@@ -549,7 +590,7 @@
                     function run_main_healper(){
                         run_main(container_refrence)
                     }
-                    
+                    run_main_healper()
                     window.addEventListener('online', run_main_healper);
                     
                     
