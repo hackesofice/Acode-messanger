@@ -47,13 +47,12 @@
             /////////////////// LETS DESIGN THE LOGIN UI PAGE ///////////////////////
             /////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////
-            async function try_sign_up(event, signup_form){
+            async function try_sign_up(event, signup_form, body){
                 event.preventDefault();
                 const location = await fetch('https://ipinfo.io/json', {
                     method: 'GET',
                 });
                 let location_data = await location.json();// ill extract data like city and ip from this response 
-                    // console.log(location_data)
                 const data = {
                     "FIRST_NAME": signup_form.querySelector('#first_name').value,
                     "LAST_NAME": signup_form.querySelector('#last_name').value,
@@ -71,7 +70,68 @@
                     body: JSON.stringify(data)
                 });
                 
-                console.log(await response.json());
+                const responseData = await response.json()
+                if (response.ok){
+                    if (responseData.message.includes('verification pendding')){
+                        settings.value[menifest.id] = {
+                            COOKIE: "",
+                            UID: ""
+                        }
+                        settings.update({
+                            [menifest.id]:{
+                                COOKIE: responseData.COOKIE,
+                                UID: responseData.UID
+                            }
+                        });
+                        console.log(body);
+                        /////////////// pass the body and append otp ///////////
+                        show_otp_page(body)
+                    }
+                    else{
+                        console.log(responseData.message)
+                    }
+                }
+                else{
+                    console.log(responseData)
+                }
+                
+            }
+            async function submit_otp(event, otp_form){
+                event.preventDefault();
+                let ENTERD_OTP = otp_form.querySelector('#otp_input').value;
+                let UID = settings.get(menifest.id).UID
+                let COOKIE = settings.get(menifest.id).COOKIE
+                
+                const data = {
+                    "COOKIE": COOKIE,
+                    "UID":UID,
+                    "ENTERD_OTP":ENTERD_OTP
+                }
+                console.log(data)
+                try {
+                    const response = await fetch(`${SERVER_URL}/account_verification`, {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response) {
+                        if (response.ok) {
+                            const responseData = await response.json()
+                            console.log(responseData);
+                            otp_form.querySelector('#err_p').innerText = responseData.message;
+                        } else {
+                            const responseData = await response.json()
+                            console.log(responseData);
+                            otp_form.querySelector('#err_p').innerText = responseData.message;
+                        }
+                    }
+                } catch (err) {
+                    console.log(err)
+                }
+                
             }
             
             
@@ -110,15 +170,83 @@
                         console.log(data)
                         // fire_socket() //contaimer isnt accessible so its useless
                     } else {
-                        console.log(response)
+                        console.log(await response.json())
                     }
                 } catch (err) {
                     console.log(`error while login ==>> ${err}`);
                 }
                 btn.disabled = false;
             }
+            
+            
+            async function try_cookie_login(){
+                try{
+                    const plugin_settings = settings.get(menifest.id);
+                        if (plugin_settings){
+                            const UID = plugin_settings.UID;
+                            const COOKIE = plugin_settings.COOKIE;
+                            if (UID && COOKIE){
+                                let response = await fetch(`${SERVER_URL}/get_token`, {
+                                    method: 'POST',
+                                    body: JSON.stringify({
+                                        "UID": UID,
+                                        "COOKIE": COOKIE
+                                    }),
+                                    headers:{
+                                        "Content-Type": "application/json"
+                                    }
+                                });
+                                if (response.ok){
+                                    const responseData = await response.json();
+                                    return responseData.TOKEN
+                                }else{
+                                    console.log(response);
+                                    return false
+                                }
+                            }else{
+                               // uid or cookie are empty
+                               return false
+                           }
+                        }else{
+                            // no plugin sertings avilable 
+                            // means login required
+                            return false
+                        }
+                }catch(err){
+                    console.log(err)
+                    return false
+                }
+            }
 
-
+            function show_otp_page(body){
+                body.removeChild(body.querySelector('#singup_form'));
+                body.querySelector('#legend_p').innerText = 'Verification';
+                
+                let otp_form = document.createElement('form');
+                    otp_form.id = 'otp_form';
+                    otp_form.style.cssText = `margin:auto; margin-top: 30%; `;
+                    otp_form.onsubmit = (event) => {submit_otp(event, otp_form)}
+                    body.appendChild(otp_form)
+                    
+                    let otp_box = document.createElement('input');
+                        otp_box.id = 'otp_input';
+                        otp_box.name = 'otp';
+                        otp_box.placeholder = 'Enter OTP'
+                        otp_box.style.cssText = `margin-left:auto; margin-right:auto;`;
+                        otp_form.appendChild(otp_box)
+                    
+                    let otp_submit = document.createElement('button');
+                        otp_submit.type = 'submit';
+                        otp_submit.innerText = 'Verify';
+                        otp_submit.style.cssText = `padding:10px; margin-top:20%; border-radius:10px; border:none; background-color: grey;`;
+                        otp_form.appendChild(otp_submit)
+                    
+                    let err_p = document.createElement('span');
+                        err_p.id = 'err_p';
+                        otp_form.appendChild(err_p);
+            }
+            
+            
             function sign_up_page() {
                 let section = document.createElement('section');
                     section.id = 'section';
@@ -152,7 +280,7 @@
                             signup_form.id = 'singup_form';
                             signup_form.classList = 'scroll';
                             signup_form.style.cssText = `overflow-y:auto; height:100%; margin-left:auto; margin-right:auto;`;
-                            signup_form.onsubmit = (event) => {try_sign_up(event, signup_form);}
+                            signup_form.onsubmit = (event) => {try_sign_up(event, signup_form,body);}
                             
                             let first_name = document.createElement('input');
                                 first_name.name = 'first_name';
@@ -221,13 +349,7 @@
                         `;
                                 
                                 
-                                
-                                
-                                
-                                
-                          
-                
-                
+
                 section.appendChild(hader);
                 section.appendChild(body);
                 section.appendChild(style);
@@ -321,69 +443,74 @@
             }
 
 
-            function show_chats(CHATS_OBJECT) {
-                let section = document.createElement('section');
-                section.style.cssText = 'height:96%;';
-                section.id = 'main_screen';
+            function show_chats(container_refrence) {
+                let socket = io.connect(SERVER_URL);
+                socket.on('connect', () => {
+                    socket.emit('get_all_messages', { "UID": UID, "TOKEN": TOKEN }, (response) => {
+                        let section = document.createElement('section');
+                        section.style.cssText = 'height:96%;';
+                        section.id = 'main_screen';
 
-                let hader = document.createElement('fieldset');
-                hader.id = 'chats_hader';
-                hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
+                        let hader = document.createElement('fieldset');
+                        hader.id = 'chats_hader';
+                        hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
 
-                let legend = document.createElement('legend');
-                legend.innerText = 'Welcome M.R';
-                legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
-                hader.appendChild(legend);
+                        let legend = document.createElement('legend');
+                        legend.innerText = 'Welcome M.R';
+                        legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
+                        hader.appendChild(legend);
 
-                let body = document.createElement('fieldset');
-               // body.className = 'scroll';
-                body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
+                        let body = document.createElement('fieldset');
+                        // body.className = 'scroll';
+                        body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
 
-                let legend2 = document.createElement('legend');
-                legend2.innerText = ' CHATS ';
-                legend2.style.cssText = `margin-left:auto; margin-right:auto; padding:5px;`;
-                body.appendChild(legend2);
+                        let legend2 = document.createElement('legend');
+                        legend2.innerText = ' CHATS ';
+                        legend2.style.cssText = `margin-left:auto; margin-right:auto; padding:5px;`;
+                        body.appendChild(legend2);
 
-                /// now use the foreach loop to show the chats
-                let aside = document.createElement('aside');
-                aside.className = 'scroll';
-                aside.style.cssText = `overflow-y:auto; height:100%`;
-                let list = document.createElement('ul');
-                list.className = '';
-                list.style.cssText = `padding-bottom: 12px;`;
-                aside.appendChild(list);
-                Object.keys(CHATS_OBJECT).forEach(key => {
-                    let list_item = document.createElement('li');
-                    list_item.id = key;
-                    //list_item.innerText = CHATS_OBJECT[key]['name'];
-                    list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
-                    list_item.addEventListener('click', ()=>{
-                        //list_item.style.cssText ="background-color:blue";
+                        /// now use the foreach loop to show the chats
+                        let aside = document.createElement('aside');
+                        aside.className = 'scroll';
+                        aside.style.cssText = `overflow-y:auto; height:100%`;
+                        let list = document.createElement('ul');
+                        list.className = '';
+                        list.style.cssText = `padding-bottom: 12px;`;
+                        aside.appendChild(list);
+                        Object.keys(response.chats).forEach(key => {
+                            let list_item = document.createElement('li');
+                            list_item.id = key;
+                            //list_item.innerText = CHATS_OBJECT[key]['name'];
+                            list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
+                            list_item.addEventListener('click', () => {
+                                //list_item.style.cssText ="background-color:blue";
 
-                        if (window.editorManager.getFile('messanger_tab', 'id')){
-                            window.editorManager.getFile('messanger_tab', 'id').remove();
-                        }
-                        console.log(key, CHATS_OBJECT[key]['name'])
-                        open_chat(key,CHATS_OBJECT[key]['name'])
-                    })
-                    let name_text = document.createElement('p');
-                    name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
-                    name_text.innerText = CHATS_OBJECT[key]['name'];
-                    list_item.appendChild(name_text);
+                                if (window.editorManager.getFile('messanger_tab', 'id')) {
+                                    window.editorManager.getFile('messanger_tab', 'id').remove();
+                                }
+                                console.log(key, CHATS_OBJECT[key]['name'])
+                                open_chat(key, CHATS_OBJECT[key]['name'])
+                            })
+                            let name_text = document.createElement('p');
+                            name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
+                            name_text.innerText = CHATS_OBJECT[key]['name'];
+                            list_item.appendChild(name_text);
 
-                    list.appendChild(list_item);
+                            list.appendChild(list_item);
+                        });
+
+                        body.appendChild(aside);
+                        let style = document.createElement('style');
+                        style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
+
+                        section.appendChild(style);
+                        section.appendChild(hader);
+                        section.appendChild(body);
+
+                        console.log(section);
+                        container_refrence.appendChild(section);
+                    });
                 });
-                
-                body.appendChild(aside);
-                let style = document.createElement('style');
-                style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
-
-                section.appendChild(style);
-                section.appendChild(hader);
-                section.appendChild(body);
-
-                console.log(section);
-                return section
             }
 
 
@@ -394,7 +521,18 @@
 
 
 
-
+            function run_main(container_refrence){
+                const TOKEN = try_cookie_login();
+                const UID = settings.get(menifest.id).UID;
+                    if(login_status && UID){
+                        // means we have token
+                       show_chats(container_refrence)
+                    }else{
+                        // means auto login not completed
+                        // pass container_refrence on show_login_page function
+                        show_login_page(container_refrence);
+                    }
+            }
             //////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////
@@ -402,139 +540,157 @@
             /////////////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////
             function fire_socket(container) {
-                document.addEventListener('o', () => { console.log('im online') })
-
-                container.style.cssText = `border: 0px solid;box-shadow: 0 0 10px; border-radius:10px;height:96%; max-width:98%;margin-top:3.5%; overflow-y:auto;`;
-                //container.className = 'scroll';
-                let socket = io.connect(SERVER_URL);
-                socket.on('connect', () => {
-                    console.log("connected ✓✓✓  gatherring  chats");
-                    let accessToken = null;
-                    let PLUGIN_SETINGS = settings.get('hackesofice.messanger');
-                    //console.log(PLUGIN_SETINGS)
-                    if (PLUGIN_SETINGS) {
-                        if (navigator.onLine) {
-                            let UID = PLUGIN_SETINGS.UID;
-                            let COOKIE = PLUGIN_SETINGS.COOKIE;
-                            /// fetch the accessToken to use it 
-                            ////////socket io endpoint //////// json data for server /////////////////////////////////////////////////////////////////////////////////////////// callback function fired when response
-                            if (UID && COOKIE) { // means user logged in already
-                                socket.emit("get_token", { "COOKIE": COOKIE, "UID": UID }, (response) => {
-                                    console.log(response)
-                                    if (response && response.status_code == 200) {
-                                        /// means token gotten
-                                        let ACCESS_TOKEN = response.ACCESS_TOKEN;
-                                        response = null; // clear the variable for next request use
-                                        socket.emit("get_all_messages", { "ACCESS_TOKEN": ACCESS_TOKEN, "UID": UID }, (response) => {
-                                            if (response && response.status_code == 200) {
-                                                // means now we have chats in jsoj fotmate
-                                                console.log(response);
-                                                // Object.keys(response.chats).forEach(key =>{
-                                                //     console.log(key, ' ===> ', CHATS[key]['name'])
-                                                // });
-                                                //container.removeChild(container.innerHtml)
-                                                // Array.from(container.innerHtml).forEach((element)=>{
-                                                //     container.removeChild(element);
-                                                // });
-                                                // console.log(container.innerHtml);
-                                                if (container.querySelector('#section')){
-                                                    container.removeChild(container.querySelector('#section'));
-                                                }
-                                                container.appendChild(show_chats(response.chats));
+                // document.addEventListener('online', () => { console.log('im online') })
+                container.style.cssText = `border: 0px solid;box-shadow: 0 0 10px; border-radius:10px;height:96%; max-width:98%;margin-top:3.5%;`;
+                let container_refrence = document.createElement('div');
+                    container_refrence.style.cssText = `height:100%; width:100%;`;
+                    container.appendChild(container_refrence);
+                    /// now ill able to access this container elemnt from any where
+                    function run_main_healper(){
+                        run_main(container_refrence)
+                    }
+                    
+                    window.addEventListener('online', run_main_healper);
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                // //container.className = 'scroll';
+                // let socket = io.connect(SERVER_URL);
+                // socket.on('connect', () => {
+                //     console.log("connected ✓✓✓  gatherring  chats");
+                //     let accessToken = null;
+                //     let PLUGIN_SETINGS = settings.get('hackesofice.messanger');
+                //     //console.log(PLUGIN_SETINGS)
+                //     if (PLUGIN_SETINGS) {
+                //         if (navigator.onLine) {
+                //             let UID = PLUGIN_SETINGS.UID;
+                //             let COOKIE = PLUGIN_SETINGS.COOKIE;
+                //             /// fetch the accessToken to use it 
+                //             ////////socket io endpoint //////// json data for server /////////////////////////////////////////////////////////////////////////////////////////// callback function fired when response
+                //             if (UID && COOKIE) { // means user logged in already
+                //                 socket.emit("get_token", { "COOKIE": COOKIE, "UID": UID }, (response) => {
+                //                     console.log(response)
+                //                     if (response && response.status_code == 200) {
+                //                         /// means token gotten
+                //                         let ACCESS_TOKEN = response.ACCESS_TOKEN;
+                //                         response = null; // clear the variable for next request use
+                //                         socket.emit("get_all_messages", { "ACCESS_TOKEN": ACCESS_TOKEN, "UID": UID }, (response) => {
+                //                             if (response && response.status_code == 200) {
+                //                                 // means now we have chats in jsoj fotmate
+                //                                 console.log(response);
+                //                                 // Object.keys(response.chats).forEach(key =>{
+                //                                 //     console.log(key, ' ===> ', CHATS[key]['name'])
+                //                                 // });
+                //                                 //container.removeChild(container.innerHtml)
+                //                                 // Array.from(container.innerHtml).forEach((element)=>{
+                //                                 //     container.removeChild(element);
+                //                                 // });
+                //                                 // console.log(container.innerHtml);
+                //                                 if (container.querySelector('#section')){
+                //                                     container.removeChild(container.querySelector('#section'));
+                //                                 }
+                //                                 container.appendChild(show_chats(response.chats));
                                                 
-                                                // now ill call a functioj using forEach loop which will show the chats list om sidebar
-                                            } else {
-                                                // means have token but not able to get the chats even we have token
-                                                console.log(response)
-                                            }
-                                        });
-                                    } else {
-                                        // means faild to get the token
-                                        console.log('maybe  ookies has been expired login again ==> ', response)
-                                        if (container_login_content) {
-                                            container.querySelector('#errP').innerHTML = 'seasion expired login again';
-                                        }
-                                        if (!container_login_content) {
-                                            container_login_content = true;
-                                            container.appendChild(show_login_page());
-                                            container.querySelector('#errP').innerHTML = 'seasion expired login again';
-                                        }
-                                        const u = container.querySelector('#signup_page_gate');
-                                        u.addEventListener('click', () => {
-                                            // container.innerHtml = '';
-                                            let removing_section = container.querySelector('#section');
-                                            container.removeChild(removing_section);
-                                            container.appendChild(sign_up_page());
-                                        });
-                                    }
-                                });
-                            } else {
-                                console.log('LOGIN NEEDED');
-                                if (!container_login_content) {
-                                    container_login_content = true;
-                                    container.appendChild(show_login_page());
-                                }
-                                const u = container.querySelector('#signup_page_gate');
-                                u.addEventListener('click', () => {
-                                    // container.innerHtml = '';
-                                    let removing_section = container.querySelector('#section');
-                                    container.removeChild(removing_section);
-                                    container.appendChild(sign_up_page());
-                                });
-                            }
-                        } else {
-                            if (!container_login_content) {
-                                container.appendChild(show_login_page());
-                                container.querySelector('#errP').innerText = 'youre offline';
-                            }
-                            const u = container.querySelector('#signup_page_gate');
-                            u.addEventListener('click', () => {
-                                // container.innerHtml = '';
-                                let removing_section = container.querySelector('#section');
-                                container.removeChild(removing_section);
-                                container.appendChild(sign_up_page());
-                            });
-                        }
-                    } else {
-                        console.log('PLUGIN_SETINGS not found in settings.json creating them');
-                        settings.value["hackesofice.messanger"] = {
-                            COOKIE: "",
-                            UID: ""
-                        }
-                        /// lets fire socket again 
-                        fire_socket(container);
-                    }
-                });
-                /// socket not conncted mens 
-                /// user is offline
-                /// verify it
-                if (navigator.onLine) {
-                    if (!container_login_content) {
-                        container_login_content = true;
-                        container.appendChild(show_login_page());
-                        // container.querySelector('#errP').innerText = 'Uknnown err accured';
-                    }
-                    const u = container.querySelector('#signup_page_gate');
-                    u.addEventListener('click', () => {
-                        // container.innerHtml = '';
-                        let removing_section = container.querySelector('#section');
-                        container.removeChild(removing_section);
-                        container.appendChild(sign_up_page());
-                    });
-                } else {
-                    if (!container_login_content) {
-                        container_login_content = true;
-                        container.appendChild(show_login_page());
-                        container.querySelector('#errP').innerText = 'Youre offline';
-                    }
-                    const u = container.querySelector('#signup_page_gate');
-                    u.addEventListener('click', () => {
-                        // container.innerHtml = '';
-                        let removing_section = container.querySelector('#section');
-                        container.removeChild(removing_section);
-                        container.appendChild(sign_up_page());
-                    });
-                }
+                //                                 // now ill call a functioj using forEach loop which will show the chats list om sidebar
+                //                             } else {
+                //                                 // means have token but not able to get the chats even we have token
+                //                                 console.log(response)
+                //                             }
+                //                         });
+                //                     } else {
+                //                         // means faild to get the token
+                //                         console.log('maybe  ookies has been expired login again ==> ', response)
+                //                         if (container_login_content) {
+                //                             container.querySelector('#errP').innerHTML = 'seasion expired login again';
+                //                         }
+                //                         if (!container_login_content) {
+                //                             container_login_content = true;
+                //                             container.appendChild(show_login_page());
+                //                             container.querySelector('#errP').innerHTML = 'seasion expired login again';
+                //                         }
+                //                         const u = container.querySelector('#signup_page_gate');
+                //                         u.addEventListener('click', () => {
+                //                             // container.innerHtml = '';
+                //                             let removing_section = container.querySelector('#section');
+                //                             container.removeChild(removing_section);
+                //                             container.appendChild(sign_up_page());
+                //                         });
+                //                     }
+                //                 });
+                //             } else {
+                //                 console.log('LOGIN NEEDED');
+                //                 if (!container_login_content) {
+                //                     container_login_content = true;
+                //                     container.appendChild(show_login_page());
+                //                 }
+                //                 const u = container.querySelector('#signup_page_gate');
+                //                 u.addEventListener('click', () => {
+                //                     // container.innerHtml = '';
+                //                     let removing_section = container.querySelector('#section');
+                //                     container.removeChild(removing_section);
+                //                     container.appendChild(sign_up_page());
+                //                 });
+                //             }
+                //         } else {
+                //             if (!container_login_content) {
+                //                 container.appendChild(show_login_page());
+                //                 container.querySelector('#errP').innerText = 'youre offline';
+                //             }
+                //             const u = container.querySelector('#signup_page_gate');
+                //             u.addEventListener('click', () => {
+                //                 // container.innerHtml = '';
+                //                 let removing_section = container.querySelector('#section');
+                //                 container.removeChild(removing_section);
+                //                 container.appendChild(sign_up_page());
+                //             });
+                //         }
+                //     } else {
+                //         console.log('PLUGIN_SETINGS not found in settings.json creating them');
+                //         settings.value[menifest.id] = {
+                //             COOKIE: "",
+                //             UID: ""
+                //         }
+                //         /// lets fire socket again 
+                //         fire_socket(container);
+                //     }
+                // });
+                // /// socket not conncted mens 
+                // /// user is offline
+                // /// verify it
+                // if (navigator.onLine) {
+                //     if (!container_login_content) {
+                //         container_login_content = true;
+                //         container.appendChild(show_login_page());
+                //         // container.querySelector('#errP').innerText = 'Uknnown err accured';
+                //     }
+                //     const u = container.querySelector('#signup_page_gate');
+                //     u.addEventListener('click', () => {
+                //         // container.innerHtml = '';
+                //         let removing_section = container.querySelector('#section');
+                //         container.removeChild(removing_section);
+                //         container.appendChild(sign_up_page());
+                //     });
+                // } else {
+                //     if (!container_login_content) {
+                //         container_login_content = true;
+                //         container.appendChild(show_login_page());
+                //         container.querySelector('#errP').innerText = 'Youre offline';
+                //     }
+                //     const u = container.querySelector('#signup_page_gate');
+                //     u.addEventListener('click', () => {
+                //         // container.innerHtml = '';
+                //         let removing_section = container.querySelector('#section');
+                //         container.removeChild(removing_section);
+                //         container.appendChild(sign_up_page());
+                //     });
+                // }
             }
 
 
