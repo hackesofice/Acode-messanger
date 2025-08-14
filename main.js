@@ -1,16 +1,117 @@
 "use-strict";
 (() => {
     const sidebarApps = acode.require('sidebarApps');
-    const tab_view = acode.require('editorFile');
+    const editorFile = acode.require('editorFile');
     const settings = acode.require('settings');
     const fs = acode.require('fs');
-    const SERVER_URL = 'https://acode-chat-backend.onrender.com';
+   // const SERVER_URL = 'http://localhost:5000' 
+   // const SERVER_URL = 'https://acode-chat-backend.onrender.com';
+    const SERVER_URL = 'https://acode-chat-backend-production.up.railway.app/';
     let container_login_content = false;
-
     var menifest = {
         "id": "hackesofice.messanger"
     }
     
+
+let local_message_database = {
+        "group1": {
+            "1": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "2": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "3": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "4": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "5": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "6": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "7": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "8": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "9": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "10": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "11": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "12": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "13": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "14": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            },
+            "15": {
+                "sender_uid": "1020202020",
+                "sender_name": "John Doe",
+                "message": "this is a message",
+                "time_stamp": "2025-08-12T14:30:00Z"
+            }
+        }
+    }
+
+
+
+
+
 
     class messanger {
         constructor() { }
@@ -25,6 +126,7 @@
             });
             
              acode.addIcon('messanger', `${this.baseUrl}icon.png`);
+             
             // await new Promise((resolve) => {
             //     icon.onload = resolve;
             // });
@@ -146,7 +248,7 @@
                     "EMAIL": login_form.querySelector('#email').value,
                     "PASSWORD": login_form.querySelector('#pass').value
                 }
-                console.log(data);
+               // console.log(data);
                 // send the data to the server through POST method to appropriate endpoint
                 try {
                     console.log(`${SERVER_URL}/login`);
@@ -173,7 +275,14 @@
                         console.log(data)
                         // fire_socket() //contaimer isnt accessible so its useless
                     } else {
-                        console.log(await response.json())
+                        const data = await response.json();
+                        if (data.message ==='Access Denaid ! Verification pending'){
+                            alert("Please Verify Your Email")
+                            show_otp_page(container_refrence)
+                        }else{
+                            console.log(data)
+                            container_refrence.querySelector('#errP').innerText = data.message
+                        }
                     }
                 } catch (err) {
                     console.log(`error while login ==>> ${err}`);
@@ -182,7 +291,7 @@
             }
             
             
-            async function try_cookie_login(){
+            async function try_cookie_login(container_refrence){
                 try{
                     const plugin_settings = settings.get(menifest.id);
                         if (plugin_settings){
@@ -202,10 +311,14 @@
                                 if (response.ok){
                                     const responseData = await response.json();
                                     console.log(responseData)
-                                    return responseData.TOKEN
-                                }else{
-                                    console.log(await response.json());
-                                    return false
+                                    return responseData
+                                } else {
+                                    if (response){
+                                        const data = await response.json();
+                                        return data
+                                    }
+                                    // 
+                                    // return false
                                 }
                             }else{
                                // uid or cookie are empty
@@ -467,12 +580,12 @@
 
 
             function show_chats(container_refrence, UID, TOKEN) {
-                let socket = io.connect(SERVER_URL);
                 // const PLUGIN_SETINGS = settings.get([menifest.id]);
                 try {
+                    let socket = io.connect(SERVER_URL);
                     socket.on('connect', () => {
                         socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
-                            console.log('get all message socket endpoint respomse', response)
+                            console.log('get all chat list socket res', response)
                             if (response.status_code == 200) {
                                 while(container_refrence.firstChild){
                                     container_refrence.removeChild(container_refrence.firstChild);
@@ -520,8 +633,8 @@
                                             window.editorManager.getFile('messanger_tab', 'id').remove();
                                         }
                                         console.log(key, CHATS_OBJECT[key]['NAME'])
-                                        open_chat(key, CHATS_OBJECT[key]['NAME'])
-                                    })
+                                        open_chat(key, CHATS_OBJECT[key]['NAME'], local_message_database["group_1"],socket)
+                                    });
                                     let name_text = document.createElement('p');
                                     name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
                                     name_text.innerText = CHATS_OBJECT[key]['NAME'];
@@ -540,8 +653,10 @@
 
                                 console.log(section);
                                 container_refrence.appendChild(section);
-                                start_listening_for_new_messages(container_refrence)
+                                // start listenig for new messages
+                                start_listening_for_new_messages(container_refrence,socket)
                             } else {
+                                // console.log(response)
                                 alert(response.message);
                                 show_login_page(container_refrence);
                             }
@@ -552,9 +667,37 @@
                 }
             }
 
-            function start_listening_for_new_messages(container_refrence){
+            function start_listening_for_new_messages(container_refrence, socket){
+                    /// now ill get the chat id of each message new
+                    /// then ill grab the all avilable tabs ids
+                    /// if the new mesaage id in any tabs id
+                    /// then ill append the new message on that tabs middle content which is scrollable
+                    /// at last ill add that message to local Dictionary database
+                // trigger new message evwnt on mew message
                 socket.on('new_message', (data) => {
-                    alert(data);
+                    console.log(data)
+                    console.log(window.editorManager.files)
+                    //window.toast(data.message);
+                    if (window.editorManager.files) {
+                        window.editorManager.files.forEach((file) => {
+                            if (file.id) {
+                                console.log(file.id)
+                                if (file.id.includes(data.GUID)) {
+                                    console.log('yess same group is opend on big screen append message');
+                                    let tab = editorFile.getFile(`messanger_tab_${data.group_id}`)
+                                    console.log(tab)
+                                    console.log('now add to local json database');
+                                } else {
+                                    console.log('nope write message to json');
+                                }
+                            } else {
+                                console.log('opend file doienst have any id')
+                            }
+                        });
+                    } else {
+                        console.log('no opend files found')
+                    }
+
                 });
             }
 
@@ -566,20 +709,67 @@
 
             async function run_main(container_refrence){
                 console.log('youre online now')
-                const TOKEN = await try_cookie_login();
-                const UID = settings.get(menifest.id).UID;
-             //   console.log(TOKEN)
-                    if(TOKEN && UID){
-                        console.log('showing chats')
-                        //console.log(UID, TOKEN)
-                        // means we have token
-                       show_chats(container_refrence, UID, TOKEN)
-                    }else{
-                        console.log('login please');
-                        // means auto login not completed
-                        // pass container_refrence on show_login_page function
+                if (!settings.get(menifest.id)){
+                   show_login_page(container_refrence); 
+                }else{
+                    const UID = settings.get(menifest.id).UID;
+                    if (UID) {
+                        const data = await try_cookie_login(container_refrence);
+                        if (data.TOKEN) {
+                            console.log('showing chats')
+                            show_chats(container_refrence, UID, data.TOKEN)
+                        } else {
+                            console.log('login please');
+                            show_login_page(container_refrence);
+                            if (data.message) {
+                                if (data.message === 'Verification pending') {
+                                    alert("Please Verify Your Email");
+                                    show_otp_page(container_refrence);
+                                } else {
+                                    if (data.message == 'Access Denaid ! Login needed') {
+                                        container_refrence.querySelector('#errP').innerText = 'Seassion Expired please login again '
+                                    } else {
+                                        console.log(data)
+                                        container_refrence.querySelector('#errP').innerText = data.message
+                                    }
+                                }
+                            }
+                        }
+                    } else {
+                        // means we have no uid or cookie stored
                         show_login_page(container_refrence);
                     }
+                }
+            }
+            
+            function send_message(event, container, send_message_form, socket, GUID){
+                event.preventDefault();
+                let PLUGIN_SETINGS = settings.get([menifest.id]);
+                if (PLUGIN_SETINGS) {
+                    event.preventDefault();
+                    socket.emit('send_message', { "sender_id": PLUGIN_SETINGS.UID, "group_id": GUID, "message": send_message_form.querySelector('#message-textarea').value }, (response) => {
+                        if (response) {
+                            console.log(response)
+                            if (response.status_code == 200) {
+                                window.toast(response.message)
+                            } else {
+                                window.toast(response.message)
+                            }
+                        }else{
+                            console.log('no response')
+                        }
+                    });
+                }else{
+                    window.toast('PLUGIN_SETINGS not found')
+                }
+                
+                
+                
+                
+                
+                
+                send_message_form.querySelector('#message-textarea').value = '';
+                send_message_form.querySelector('#message-textarea').focus();
             }
             //////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////////////
@@ -753,9 +943,69 @@
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
-            /////////////
-            // for now im calling without checking any conditions
-
+            function open_this_chat_on_new_tab(id, name, messagesData, container, socket){
+                let main_page = document.createElement('div');
+                    main_page.id = id;
+                    main_page.style.cssText = 'min-height:99%; width:100%; display:flex; flex-direction:column; border:1px dotted black;';
+                    
+                    let top_container_or_heder_strip = document.createElement('div');
+                        top_container_or_heder_strip.style.cssText = 'positon:fixed;box-shadow:0 2px 5px; margin-top: 2%;width:96%; margin-left:auto; margin-right:auto; border:none; border-radius:10px; ';
+                        
+                        let logo_and_title_div = document.createElement('div');
+                            logo_and_title_div.style.cssText = 'height:100%; width:100%; display:flex; flex-direction:row;';
+                            
+                            let logo_div = document.createElement('div');
+                                logo_div.id = "logo_div";
+                                logo_div.style.cssText = 'height:40px; margin:8px 8px; width:50px; box-shadow:0 0 5px; border-radius:10px; background-color:yellow;';
+                                logo_and_title_div.appendChild(logo_div);
+                                
+                            let name_p = document.createElement('p');
+                                name_p.style.cssText = 'flex-grow:1; margin:auto 0 auto 20px;';
+                                name_p.innerText = name;
+                                logo_and_title_div.appendChild(name_p);
+                            
+                            top_container_or_heder_strip.appendChild(logo_and_title_div);
+                                
+    
+                    let centre_container_or_message_area = document.createElement('div');
+                        centre_container_or_message_area.className = 'scroll';
+                        centre_container_or_message_area.style.cssText = "flex-grow: 1; overflow-y:auto;";
+                    
+                    
+                    let bottom_container_or_message_writing_area = document.createElement('div');
+                        bottom_container_or_message_writing_area.style.cssText = 'width:96%; margin:0 2% 7px 2%; border-radius:10px; box-shadow:0 2px 5px; border:1px solid black;';
+                        
+                        let send_message_form = document.createElement('form');
+                            send_message_form.id = 'message-form';
+                            send_message_form.onsubmit = (event)=>{send_message(event, container, send_message_form, socket, id)}
+                            send_message_form.style.cssText = 'display:flex; flex-direction:row; border:none;';
+                            
+                            let message_text_area = document.createElement('textarea');
+                                message_text_area.autofocus = true;
+                                message_text_area.focus();
+                                message_text_area.id = 'message-textarea';
+                                message_text_area.style.cssText = 'flex-grow:1; border:none; ';
+                                message_text_area.placeholder = "Type your message";
+                                send_message_form.appendChild(message_text_area);
+                        
+                            let send_btn = document.createElement('button');
+                                send_btn.innerHTML = '<p style="margin:auto;">Send</p>';
+                                send_btn.style.cssText = 'width:30px; height:30px; border-radius:5px;';
+                                send_btn.type = 'submit';
+                                send_message_form.appendChild(send_btn);
+                            
+                            bottom_container_or_message_writing_area.appendChild(send_message_form);
+                    
+                    
+                
+                main_page.appendChild(top_container_or_heder_strip);
+                main_page.appendChild(centre_container_or_message_area);
+                main_page.appendChild(bottom_container_or_message_writing_area);
+                
+                container.appendChild(main_page);
+                console.log(container)
+                return true
+            }
 
 
 
@@ -796,12 +1046,21 @@
             ////////////////  function for appending new tab  /////////////
             ///////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////
-            function open_chat(id, name){
-                const tab = new tab_view(name, {
+            
+            function open_chat(id, name, messagesData, socket){
+                let container = document.createElement("div");
+                    container.style.cssText = 'margin-bottom:0; width:100%; height:99%;';
+                    
+                    // let section = document.createElement('section');
+                    //     container.appendChild(section);
+                    open_this_chat_on_new_tab(id, name,messagesData, container, socket)
+
+                const tab = new editorFile(name, {
                     type: 'custom',
-                    id: 'messanger_tab',
+                    uri: name,
+                    id: `messanger_tab_${id}`,
                     tabIcon: 'icon messanger',
-                    content: "dive content variable/ function",
+                    content: container,
                     stylesheets: '/static/style.css',
                     hideQuickTools: true,
                     render: true
@@ -809,7 +1068,7 @@
                 });
                 // setTimeout(()=>{
                 //     console.log(window.editorManager.getFile('messanger_tab', 'id').remove())
-                // //   const tab = tab_view.getFile('messanger_tab', 'id');
+                // //   const tab = editorFile.getFile('messanger_tab', 'id');
                 // //         tab.remove();
                 // }, 4000)
             }
