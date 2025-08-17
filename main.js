@@ -1,12 +1,14 @@
 "use-strict";
 (() => {
+    const editorManager = window.editorManager;
     const sidebarApps = acode.require('sidebarApps');
     const editorFile = acode.require('editorFile');
     const settings = acode.require('settings');
     const fs = acode.require('fs');
-   // const SERVER_URL = 'http://localhost:5000' 
+    const SERVER_URL = 'http://localhost:5000' 
    // const SERVER_URL = 'https://acode-chat-backend.onrender.com';
-    const SERVER_URL = 'https://acode-chat-backend-production.up.railway.app/';
+    //const SERVER_URL = 'https://acode-chat-backend-production.up.railway.app/';
+   // const SERVER_URL = 'https://parental-kelci-nothinghjn-df173882.koyeb.app/';
     let container_login_content = false;
     var menifest = {
         "id": "hackesofice.messanger"
@@ -225,7 +227,7 @@ let local_message_database = {
                             console.log(responseData);
                             otp_form.querySelector('#err_p').innerText = responseData.message
                             console.log(responseData.TOKEN)
-                            show_chats(container_refrence, UID, responseData.TOKEN)
+                            show_main_page(container_refrence, UID, responseData.TOKEN)
                         } else {
                             const responseData = await response.json()
                             console.log(responseData);
@@ -271,7 +273,7 @@ let local_message_database = {
                                 COOKIE: data.COOKIE
                             }
                         });
-                        show_chats(container_refrence, data.UID, data.TOKEN)
+                        show_main_page(container_refrence, data.UID, data.TOKEN)
                         console.log(data)
                         // fire_socket() //contaimer isnt accessible so its useless
                     } else {
@@ -540,7 +542,7 @@ let local_message_database = {
                 submit.type = 'submit';
                 submit.innerText = 'SUBMIT';
                 //submit.onClick = submit_data
-                submit.style.cssText = `display: block; margin-left:auto; margin-right:auto; margin-top:30px; margin-bottom:30px; background-color:transperent; padding:10px 20px; border-radius:30px;`;
+                submit.style.cssText = `display: block; margin-left:auto; margin-right:auto; margin-top:30px; margin-bottom:30px; background-color:transparent; padding:10px 20px; border-radius:30px;`;
                 login_form.appendChild(submit);
 
                 let errP = document.createElement('p');
@@ -562,6 +564,7 @@ let local_message_database = {
                             #signup_page_gate:hover {
                                 color:grey;
                             }
+
                         `;
 
                 section.appendChild(style);
@@ -578,92 +581,199 @@ let local_message_database = {
                 return true
             }
 
-
-            function show_chats(container_refrence, UID, TOKEN) {
+            
+            /////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////
+            ////////////////// chats or all users page//////////////////
+            /////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////
+            function show_main_page(container_refrence, UID, TOKEN) {
                 // const PLUGIN_SETINGS = settings.get([menifest.id]);
                 try {
-                    let socket = io.connect(SERVER_URL);
-                    socket.on('connect', () => {
-                        socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
-                            console.log('get all chat list socket res', response)
-                            if (response.status_code == 200) {
-                                while(container_refrence.firstChild){
-                                    container_refrence.removeChild(container_refrence.firstChild);
-                                }
-                                let section = document.createElement('section');
-                                section.style.cssText = 'height:96%;';
-                                section.id = 'main_screen';
+                    while (container_refrence.firstChild) {
+                        container_refrence.removeChild(container_refrence.firstChild);
+                    }
+                    let style = document.createElement('style');
+                    style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
 
-                                let hader = document.createElement('fieldset');
-                                hader.id = 'chats_hader';
-                                hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
+                    let section = document.createElement('section');
+                    section.style.cssText = 'height:96%;';
+                    section.id = 'main_screen';
 
-                                let legend = document.createElement('legend');
-                                legend.innerText = 'Welcome M.R';
-                                legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
-                                hader.appendChild(legend);
+                    let hader = document.createElement('fieldset');
+                    hader.id = 'chats_hader';
+                    hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:15%; height:5%; width:70%; box-shadow:0 5px 10px; border-radius:10px; border:none;`;
 
-                                let body = document.createElement('fieldset');
-                                // body.className = 'scroll';
-                                body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 0 10px; margin-top:20%; border-radius:10px; height:87%; `;
+                    let legend = document.createElement('legend');
+                    legend.innerText = 'Welcome M.R';
+                    legend.style.cssText = `border:none; margin-left:auto; margin-right:auto; box-shadow:0 5 10px; padding:5px;`;
+                    hader.appendChild(legend);
 
-                                let legend2 = document.createElement('legend');
-                                legend2.innerText = ' CHATS ';
-                                legend2.style.cssText = `margin-left:auto; margin-right:auto; padding:5px;`;
-                                body.appendChild(legend2);
+                    let body = document.createElement('fieldset');
+                    // body.className = 'scroll';
+                    body.style.cssText = `border:none; margin-right:auto; margin-left:auto; box-shadow:0 4px 5px; margin-top:20%; border-radius:10px; height:87%; `;
 
-                                /// now use the foreach loop to show the chats
-                                let aside = document.createElement('aside');
-                                aside.className = 'scroll';
-                                aside.style.cssText = `overflow-y:auto; height:100%`;
-                                let list = document.createElement('ul');
-                                list.className = '';
-                                list.style.cssText = `padding-bottom: 12px;`;
-                                aside.appendChild(list);
-                                const CHATS_OBJECT = response.chats;
-                                Object.keys(response.chats).forEach(key => {
-                                    let list_item = document.createElement('li');
-                                    list_item.id = key;
-                                    //list_item.innerText = CHATS_OBJECT[key]['name'];
-                                    list_item.style.cssText = `height:40px; box-shadow:0 2px 5px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 10px;`;
-                                    list_item.addEventListener('click', () => {
-                                        //list_item.style.cssText ="background-color:blue";
+                    let legend2 = document.createElement('legend');
+                    legend2.style.cssText = `margin-left:auto; margin-right:auto; border:none; width:80%; `;
 
-                                        if (window.editorManager.getFile('messanger_tab', 'id')) {
-                                            window.editorManager.getFile('messanger_tab', 'id').remove();
-                                        }
-                                        console.log(key, CHATS_OBJECT[key]['NAME'])
-                                        open_chat(key, CHATS_OBJECT[key]['NAME'], local_message_database["group_1"],socket)
-                                    });
-                                    let name_text = document.createElement('p');
-                                    name_text.style.cssText = `margin-top:auto; margin-bottom:auto;`;
-                                    name_text.innerText = CHATS_OBJECT[key]['NAME'];
-                                    list_item.appendChild(name_text);
+                    // div for applying better css which lgend not supprts
+                    let legend2_div = document.createElement('div');
+                    legend2_div.style.cssText = 'margin-left:auto; margin-right:auto; border-radius:20px; box-shadow:0 1px 3px; padding:5px; display:flex; flex-direction:row; column-gap:auto; justify-content:space-between;height:100%; width:100%;';
 
-                                    list.appendChild(list_item);
-                                });
+                    let chats_div = document.createElement('div')
+                    chats_div.style.cssText = 'padding:3px 10px; border:none; border-radius:10px; box-shadow:0 1px 2px;'
+                    chats_div.innerText = 'CHATS';
+                    chats_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,body, list, 'chats')}
+                    legend2_div.appendChild(chats_div);
 
-                                body.appendChild(aside);
-                                let style = document.createElement('style');
-                                style.textContent = `aside::-webkit-scrollbar{display:none; color:blue;}`;
+                    let users_div = document.createElement('div');
+                    users_div.innerText = 'USERS'
+                    users_div.style.cssText = 'padding:3px 10px; border:none; border-radius:10px; box-shadow:0 1px 2px;'
+                    users_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,body, list, 'users')}
+                    legend2_div.appendChild(users_div);
+                    legend2.appendChild(legend2_div);
+                    body.appendChild(legend2);
 
-                                section.appendChild(style);
-                                section.appendChild(hader);
-                                section.appendChild(body);
+                    /// now use the foreach loop to show the chats
+                    let aside = document.createElement('aside');
+                    aside.className = 'scroll';
+                    aside.style.cssText = `margin-top:6%; overflow-y:auto; height:80%`;
+                    let list = document.createElement('ul');
+                    list.className = '';
+                    list.style.cssText = `padding-bottom: 12px;`;
+                    aside.appendChild(list);
 
-                                console.log(section);
-                                container_refrence.appendChild(section);
-                                // start listenig for new messages
-                                start_listening_for_new_messages(container_refrence,socket)
-                            } else {
-                                // console.log(response)
-                                alert(response.message);
-                                show_login_page(container_refrence);
-                            }
-                        });
-                    });
+                    section.appendChild(style);
+                    section.appendChild(hader);
+                    section.appendChild(body);
+                    container_refrence.appendChild(section);
+                    body.appendChild(aside);
+                    chats_div.click()
                 } catch (err) {
                     console.log(err)
+                }
+            }
+            
+           async function get_and_show_chats_or_users_list(UID, TOKEN, container_refrence, body,list, what_to_show) {
+                let socket = io.connect(SERVER_URL);
+                
+                let style = document.createElement('style')
+                    body.insertBefore(style, body.lastChild)
+                    style.textContent = ` 
+                            .active {
+                                background-color:skyblue;
+                            }
+                        `;
+                    console.log(body)
+                if (what_to_show == 'chats') {
+                    console.log(body.firstChild.firstChild.firstChild.classList)
+                    if (body.firstChild.firstChild.firstChild.classList.contains('active')){
+                        return 
+                    }
+                    body.firstChild.firstChild.firstChild.classList.add('active')
+                    body.firstChild.firstChild.lastChild.classList.remove('active')
+                    console.log(body.firstChild.firstChild.firstChild)
+                    console.log('chats clicked')
+                    try {
+                        socket.on('connect', () => {
+                            socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
+                                if (response.status_code == 200) {
+                                    while (body.lastChild.firstChild.firstChild) {
+                                        body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
+                                    }
+                                    let data = response.chats
+                                    start_listening_for_new_messages(container_refrence, socket);
+                                    Object.keys(data).forEach(key => {
+                                        let list_item = document.createElement('li');
+                                        list_item.id = key;
+                                        //list_item.innerText = CHATS_OBJECT[key]['name'];
+                                        list_item.style.cssText = `height:35px; padding:5px 5px 5px 7px; box-shadow:0 1px 3px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 20px; display:flex; flex-direction:row; column-gap:10px`;
+                                        list_item.addEventListener('click', () => {
+                                            //list_item.style.cssText ="background-color:blue";
+                                            if (editorManager.getFile('messanger_tab', 'id')) {
+                                                editorManager.getFile('messanger_tab', 'id').remove();
+                                            }
+                                            //console.log(key, CHATS_OBJECT[key]['NAME'])
+                                            open_chat(key, data[key]['NAME'], local_message_database["group_1"], socket, 'old_chat')
+                                        });
+
+                                        let chat_logo = document.createElement('div');
+                                        chat_logo.style.backgroundImage = ``;
+                                        chat_logo.style.cssText = `border:none; border-radius:50%; height:35px; width:35px; background-size:cover; background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
+                                        list_item.appendChild(chat_logo);
+                                        let name_text = document.createElement('p');
+                                        name_text.style.cssText = `margin-top:auto; margin-bottom:auto; overflow-y:auto;`;
+                                        name_text.innerText = data[key]['NAME'];
+                                        list_item.appendChild(name_text);
+
+                                        list.appendChild(list_item);
+                                    });
+                                } else {
+                                    alert(response.message);
+                                    show_login_page(container_refrence);
+                                }
+                            });
+                        });
+                    } catch (err) {
+                        console.log(err)
+                    }
+                } else if (what_to_show == 'users') {
+                    if(body.firstChild.firstChild.lastChild.classList.contains('active')){
+                        return
+                    }
+                    // console.log('users clicked')
+                    body.firstChild.firstChild.firstChild.classList.remove('active');
+                    body.firstChild.firstChild.lastChild.classList.add('active');
+                    //console.log(body.lastChild.firstChild.firstChild)
+                    while(body.lastChild.firstChild.firstChild){
+                        body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
+                    }
+                    try {
+                        const response = await fetch(`${SERVER_URL}/get_all_users`, {
+                            method: 'POST',
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
+                                "UID": UID,
+                                "TOKEN":TOKEN
+                            })
+                            
+                        });
+                        if (response.ok) {
+                            const data = await response.json();
+                            Object.keys(data).forEach(key => {
+                                let list_item = document.createElement('li');
+                                list_item.id = UID + '_' + key;
+                                //list_item.innerText = CHATS_OBJECT[key]['name'];
+                                list_item.style.cssText = `height:35px; padding:5px 5px 5px 7px; box-shadow:0 1px 3px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 20px; display:flex; flex-direction:row; column-gap:10px`;
+
+                                list_item.addEventListener('click', () => {
+                                    //list_item.style.cssText ="background-color:blue";
+                                    if (editorManager.getFile('messanger_tab', 'id')) {
+                                        editorManager.getFile('messanger_tab', 'id').remove();
+                                    }
+                                    //console.log(key, CHATS_OBJECT[key]['NAME'])
+                                    open_chat(UID + '_' + key, data[key]['NAME'], local_message_database["group_1"], socket, 'new_chat')
+                                });
+
+                                let chat_logo = document.createElement('div');
+                                chat_logo.style.backgroundImage = ``;
+                                chat_logo.style.cssText = `border:none; border-radius:50%; height:35px; width:35px; background-size:cover; background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
+                                list_item.appendChild(chat_logo);
+                                let name_text = document.createElement('p');
+                                name_text.style.cssText = `margin-top:auto; margin-bottom:auto; overflow-y:auto;`;
+                                name_text.innerText = data[key]['NAME'];
+                                list_item.appendChild(name_text);
+
+                                list.appendChild(list_item);
+                            });
+                        }else{
+                            console.log(await response.json())
+                        }
+                    } catch (err) {
+                        console.log(err)
+                    }
                 }
             }
 
@@ -682,11 +792,55 @@ let local_message_database = {
                         window.editorManager.files.forEach((file) => {
                             if (file.id) {
                                 console.log(file.id)
-                                if (file.id.includes(data.GUID)) {
+                                if (file.id.includes(data.group_id)) {
                                     console.log('yess same group is opend on big screen append message');
-                                    let tab = editorFile.getFile(`messanger_tab_${data.group_id}`)
-                                    console.log(tab)
-                                    console.log('now add to local json database');
+                                    let tab = editorManager.getFile(`messanger_tab_${data.group_id}`, 'id');
+                                    let tab_messages_container = tab.content.shadowRoot.querySelector(`#chats_elemnt_${data.group_id}`);
+                                        
+                                    let others_message = document.createElement('fieldset');
+                                        console.log(settings.get(menifest.id));
+                                        
+                                        const me = data.sender_id == settings.get(menifest.id)['UID'];
+                                        if(!me){
+                                            others_message.style.cssText = "max-width:70%; min-width:30%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-right:auto;";
+                                            let sender_legend = document.createElement('legend');
+                                                sender_legend.style.cssText = 'margin-left:-20px; display:flex; flex-direction:row; column-gap:3px;border-radius: 5px;';
+
+                                                let sender_profile_pic = document.createElement('div');
+                                                    sender_profile_pic.style.cssText = "height:15px; width:15px; border-radius:5px; margin-top:2px;";
+                                                    sender_profile_pic.style.backgroundImage = `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
+                                                    sender_profile_pic.style.backgroundSize = 'cover';
+                                                    sender_legend.appendChild(sender_profile_pic);
+                                                    
+                                                let sender_name = document.createElement('p');
+                                                    sender_name.innerText = 'hackesofice';
+                                                    sender_legend.appendChild(sender_name);
+                                                    
+                                                others_message.appendChild(sender_legend);
+                                            let message = document.createElement('p');
+                                                message.style.cssText = 'font-weight:500; overflow-x:auto; margin-right:auto;';
+                                                message.innerText = data.message
+                                                others_message.appendChild(message);
+                                        } else {
+                                            others_message.style.cssText = "max-width:70%; min-width:20%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-left:auto;";
+                                            let message = document.createElement('p');
+                                                message.style.cssText = 'font-weight:500; overflow-x:auto; margin-left:auto;';
+                                                message.innerText = data.message
+                                                others_message.appendChild(message);
+                                        }
+                                        
+                                    tab_messages_container.appendChild(others_message);
+                                    
+                                    // auto scrall tp last message
+                                        tab_messages_container.scrollTo({
+                                            top: tab_messages_container.scrollHeight,
+                                            behavior: 'smooth'
+                                        });
+                                    
+                                    //console.log(tab.tab);
+                                    //console.log(tab);
+                                    //console.log(tab_messages_container);
+                                    //console.log('now add to local json database');
                                 } else {
                                     console.log('nope write message to json');
                                 }
@@ -717,7 +871,7 @@ let local_message_database = {
                         const data = await try_cookie_login(container_refrence);
                         if (data.TOKEN) {
                             console.log('showing chats')
-                            show_chats(container_refrence, UID, data.TOKEN)
+                            show_main_page(container_refrence, UID, data.TOKEN)
                         } else {
                             console.log('login please');
                             show_login_page(container_refrence);
@@ -742,12 +896,13 @@ let local_message_database = {
                 }
             }
             
-            function send_message(event, container, send_message_form, socket, GUID){
+            function send_message(event, container, send_message_form, socket, GUID, new_or_old_chat){
                 event.preventDefault();
                 let PLUGIN_SETINGS = settings.get([menifest.id]);
                 if (PLUGIN_SETINGS) {
                     event.preventDefault();
-                    socket.emit('send_message', { "sender_id": PLUGIN_SETINGS.UID, "group_id": GUID, "message": send_message_form.querySelector('#message-textarea').value }, (response) => {
+                    let socket_route = (new_or_old_chat == 'new_chat') ? 'send_message_new_chat':'send_message';
+                    socket.emit(socket_route, { "sender_id": PLUGIN_SETINGS.UID, "group_id": GUID, "message": send_message_form.querySelector('#message-textarea').value }, (response) => {
                         if (response) {
                             console.log(response)
                             if (response.status_code == 200) {
@@ -834,7 +989,7 @@ let local_message_database = {
                 //                                 if (container.querySelector('#section')){
                 //                                     container.removeChild(container.querySelector('#section'));
                 //                                 }
-                //                                 container.appendChild(show_chats(response.chats));
+                //                                 container.appendChild(show_main_page(response.chats));
                                                 
                 //                                 // now ill call a functioj using forEach loop which will show the chats list om sidebar
                 //                             } else {
@@ -943,54 +1098,70 @@ let local_message_database = {
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
-            function open_this_chat_on_new_tab(id, name, messagesData, container, socket){
+            function open_this_chat_on_new_tab(id, name, messagesData, container, socket, new_or_old_chat){
                 let main_page = document.createElement('div');
-                    main_page.id = id;
-                    main_page.style.cssText = 'min-height:99%; width:100%; display:flex; flex-direction:column; border:1px dotted black;';
+                    main_page.id = 'idds';
+                    main_page.style.cssText = 'min-height:99%; max-height:99%; min-width:99%;  max-width:99%; display:flex; flex-direction:column; border:1px dotted black; margin-left:auto; margin-right:auto;';
                     
                     let top_container_or_heder_strip = document.createElement('div');
-                        top_container_or_heder_strip.style.cssText = 'positon:fixed;box-shadow:0 2px 5px; margin-top: 2%;width:96%; margin-left:auto; margin-right:auto; border:none; border-radius:10px; ';
+                        top_container_or_heder_strip.style.cssText = 'positon:sticky; box-shadow:0 1px 2px; margin-top: 2%; width:92%; margin-left:auto; margin-right:auto; border:none; border-radius:20px; display:flex; flex-direction:row; padding:5px 7px;';
                         
-                        let logo_and_title_div = document.createElement('div');
-                            logo_and_title_div.style.cssText = 'height:100%; width:100%; display:flex; flex-direction:row;';
-                            
                             let logo_div = document.createElement('div');
                                 logo_div.id = "logo_div";
-                                logo_div.style.cssText = 'height:40px; margin:8px 8px; width:50px; box-shadow:0 0 5px; border-radius:10px; background-color:yellow;';
-                                logo_and_title_div.appendChild(logo_div);
+                                logo_div.style.cssText = `height:30px; width:30px; border-radius:50%; border:none; margin-top:auto; margin-bottom:auto; background-size:cover; background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s');`;
+                                top_container_or_heder_strip.appendChild(logo_div);
+                                
+                                // let logo_img = document.createElement('img');
+                                //     logo_img.src = '';
+                                //     logo_img.style.cssText = 'height:30px; width:30px; border-radius:50%;';
+                                //     logo_div.appendChild(logo_img);
                                 
                             let name_p = document.createElement('p');
-                                name_p.style.cssText = 'flex-grow:1; margin:auto 0 auto 20px;';
+                                name_p.style.cssText = 'flex-grow:1; margin:auto 0 auto 20px; overflow-y:auto;';
                                 name_p.innerText = name;
-                                logo_and_title_div.appendChild(name_p);
+                                top_container_or_heder_strip.appendChild(name_p);
                             
-                            top_container_or_heder_strip.appendChild(logo_and_title_div);
+                           // top_container_or_heder_strip.appendChild(logo_and_title_div);
                                 
-    
+                    ///// ///////////////////////////////////
+                    /////// center or chats container///////
+                    ////////////////////////////////////////
                     let centre_container_or_message_area = document.createElement('div');
-                        centre_container_or_message_area.className = 'scroll';
-                        centre_container_or_message_area.style.cssText = "flex-grow: 1; overflow-y:auto;";
-                    
+                        centre_container_or_message_area.style.cssText = "min-width:95%; max-width:95%; min-height:100%; max-height:100%; flex-grow: 1; display:flex; margin-left:auto; margin-right:auto; ";
+                        
+                        let actual_message_container = document.createElement('section');
+                            actual_message_container.id = `chats_elemnt_${id}`;
+                            actual_message_container.className = 'scroll';
+                            actual_message_container.style.cssText = 'flex-grow:1; overflow-y:auto; min-height:90%; max-height:90%; display:flex; flex-direction:column; row-gap:10px; padding:20px; ';
+                            centre_container_or_message_area.appendChild(actual_message_container);
+                            
+                            
+                                //actual_message_container.appendChild(others_message)
+                                    
+                                    
+                                
+                        
                     
                     let bottom_container_or_message_writing_area = document.createElement('div');
-                        bottom_container_or_message_writing_area.style.cssText = 'width:96%; margin:0 2% 7px 2%; border-radius:10px; box-shadow:0 2px 5px; border:1px solid black;';
+                        bottom_container_or_message_writing_area.style.cssText = 'width:96%; min-height:55px; max-height:100px; positon:fixed; margin:0 2% 9px 2%; overflow:hidden; border:none;';
                         
                         let send_message_form = document.createElement('form');
                             send_message_form.id = 'message-form';
-                            send_message_form.onsubmit = (event)=>{send_message(event, container, send_message_form, socket, id)}
-                            send_message_form.style.cssText = 'display:flex; flex-direction:row; border:none;';
+                            send_message_form.onsubmit = (event)=>{send_message(event, container, send_message_form, socket, id, new_or_old_chat)}
+                            send_message_form.style.cssText = 'display:flex; flex-direction:row; column-gap:10px; border:1px solid; padding:6px 6px; max-height:100%; max-width:100%; border-radius:30px; ';
                             
                             let message_text_area = document.createElement('textarea');
                                 message_text_area.autofocus = true;
                                 message_text_area.focus();
                                 message_text_area.id = 'message-textarea';
-                                message_text_area.style.cssText = 'flex-grow:1; border:none; ';
+                                message_text_area.rows = 1;
+                                message_text_area.style.cssText = 'flex-grow:1; border:none; padding:12px 15px 5px 15px; border-radius:20px; box-shadow:0 1px 2px; background-color:transparent;';
                                 message_text_area.placeholder = "Type your message";
                                 send_message_form.appendChild(message_text_area);
                         
                             let send_btn = document.createElement('button');
                                 send_btn.innerHTML = '<p style="margin:auto;">Send</p>';
-                                send_btn.style.cssText = 'width:30px; height:30px; border-radius:5px;';
+                                send_btn.style.cssText = 'width:40px; height:40px; border-radius:20px; border:none; box-shadow:0 2px 4px; background:transparent;';
                                 send_btn.type = 'submit';
                                 send_message_form.appendChild(send_btn);
                             
@@ -1047,27 +1218,29 @@ let local_message_database = {
             ///////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////
             
-            function open_chat(id, name, messagesData, socket){
+            function open_chat(id, name, messagesData, socket, new_or_old_chat){
                 let container = document.createElement("div");
                     container.style.cssText = 'margin-bottom:0; width:100%; height:99%;';
                     
                     // let section = document.createElement('section');
                     //     container.appendChild(section);
-                    open_this_chat_on_new_tab(id, name,messagesData, container, socket)
-
+                    // pass the container and appned the ui of chat
+                    open_this_chat_on_new_tab(id, name,messagesData, container, socket, new_or_old_chat)
+                
+                // pass the container tó enable edits
                 const tab = new editorFile(name, {
-                    type: 'custom',
-                    uri: name,
+                    type: 'page',
+                    uri: 'By Messanger - AX',
                     id: `messanger_tab_${id}`,
                     tabIcon: 'icon messanger',
                     content: container,
-                    stylesheets: '/static/style.css',
+                    stylesheets: '/static/css/tab.css',
                     hideQuickTools: true,
                     render: true
                     
                 });
                 // setTimeout(()=>{
-                //     console.log(window.editorManager.getFile('messanger_tab', 'id').remove())
+                //     console.log(editorManager.getFile('messanger_tab', 'id').remove())
                 // //   const tab = editorFile.getFile('messanger_tab', 'id');
                 // //         tab.remove();
                 // }, 4000)
