@@ -152,7 +152,10 @@ let local_message_database = {
             /////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////
             async function try_sign_up(event, signup_form, container_refrence){
+                signup_form.querySelector('#submit').innerText='';
+                signup_form.querySelector('#submit').appendChild(show_loader());
                 event.preventDefault();
+                
                 const location = await fetch('https://ipinfo.io/json', {
                     method: 'GET',
                 });
@@ -192,11 +195,22 @@ let local_message_database = {
                         show_otp_page(container_refrence)
                     }
                     else{
-                        console.log(responseData.message)
+                        signup_form.querySelector('#err_p').innerText = responseData.message;
+                        //console.log(responseData.message)
+                        setTimeout(()=>{
+                            signup_form.querySelector('#err_p').innerText = '';
+                            signup_form.querySelector('#submit').innerText = 'Sign-Up';
+                        },3000);
+                        
                     }
                 }
                 else{
-                    console.log(responseData)
+                   // console.log(responseData)
+                    signup_form.querySelector('#err_p').innerText = responseData.message;
+                    setTimeout(()=>{
+                        signup_form.querySelector('#err_p').innerText = '';
+                        signup_form.querySelector('#submit').innerText = 'Sign-Up';
+                    },3000)
                 }
                 
             }
@@ -244,6 +258,7 @@ let local_message_database = {
             
             async function try_login(event, login_form, container_refrence) {
                 event.preventDefault();
+                login_form.appendChild(show_loader())
                 let btn = login_form.querySelector('#pass');
                 btn.disabled = true;
                 let data = {
@@ -295,6 +310,7 @@ let local_message_database = {
             
             async function try_cookie_login(container_refrence){
                 try{
+                    container_refrence.appendChild(show_loader())
                     const plugin_settings = settings.get(menifest.id);
                         if (plugin_settings){
                             const UID = plugin_settings.UID;
@@ -336,7 +352,39 @@ let local_message_database = {
                     return false
                 }
             }
-
+            function show_loader() {
+                let loader_div = document.createElement('div');
+                    loader_div.style.cssText = 'height:10px; width:10px; margin:auto;'
+                    loader_div.id = 'loader'
+                let loader_style = document.createElement('style');
+                loader_style.textContent = `
+                                            @keyframes rotate{
+                                                0%{
+                                                    transform: rotate(0deg);
+                                                }
+                                                100%{
+                                                    transform: rotate(360deg);
+                                                }
+                                            }
+                                            
+                                            #loader{
+                                                height:100%;
+                                                width:100%;
+                                                border:3px solid;
+                                                border-radius:50%;
+                                                border-top:5px solid skyblue;
+                                                animation-name: rotate;
+                                                animation-duration:500ms;
+                                                animation-iteration-count:infinite;
+                                            }
+                                            `;
+                let loader = document.createElement('div');
+                loader.id = 'loader_spiner';
+                loader_div.appendChild(loader_style)
+                loader_div.appendChild(loader)
+                return loader_div
+            }
+            
             function show_otp_page(container_refrence){
               //  body.removeChild(body.querySelector('#singup_form'));
               //  body.querySelector('#legend_p').innerText = 'Verification';
@@ -457,8 +505,13 @@ let local_message_database = {
                                 confirm_pw.placeholder = 'Re Enter Your Password';
                                 signup_form.appendChild(confirm_pw);
                             
+                            let err_p = document.createElement('p');
+                                err_p.id = 'err_p';
+                                err_p.style.cssText = 'color:red; text-align:center;';
+                                signup_form.appendChild(err_p);
                             let submit = document.createElement('button');
                                 submit.type = 'submit';
+                                submit.id = 'submit';
                                 submit.innerText = 'Sign-Up';
                                 signup_form.appendChild(submit);
                             
@@ -655,7 +708,9 @@ let local_message_database = {
             }
             
            async function get_and_show_chats_or_users_list(UID, TOKEN, container_refrence, body,list, what_to_show) {
-                let socket = io.connect(SERVER_URL);
+               let socket = io.connect(SERVER_URL);
+               start_listening_for_new_messages(container_refrence, socket);
+                
                 
                 let style = document.createElement('style')
                     body.insertBefore(style, body.lastChild)
@@ -675,14 +730,15 @@ let local_message_database = {
                     console.log(body.firstChild.firstChild.firstChild)
                     console.log('chats clicked')
                     try {
+                        while (body.lastChild.firstChild.firstChild) {
+                            body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
+                        }
+                        body.appendChild(show_loader())
                         socket.on('connect', () => {
                             socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
                                 if (response.status_code == 200) {
-                                    while (body.lastChild.firstChild.firstChild) {
-                                        body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
-                                    }
-                                    let data = response.chats
-                                    start_listening_for_new_messages(container_refrence, socket);
+                                    body.removeChild(body.querySelector('#loader'));
+                                    let data = response.chats;
                                     Object.keys(data).forEach(key => {
                                         let list_item = document.createElement('li');
                                         list_item.id = key;
@@ -728,6 +784,7 @@ let local_message_database = {
                     while(body.lastChild.firstChild.firstChild){
                         body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
                     }
+                    body.appendChild(show_loader())
                     try {
                         const response = await fetch(`${SERVER_URL}/get_all_users`, {
                             method: 'POST',
@@ -742,6 +799,7 @@ let local_message_database = {
                         });
                         if (response.ok) {
                             const data = await response.json();
+                            body.removeChild(body.querySelector('#loader'))
                             Object.keys(data).forEach(key => {
                                 let list_item = document.createElement('li');
                                 list_item.id = UID + '_' + key;
@@ -902,6 +960,7 @@ let local_message_database = {
                 if (PLUGIN_SETINGS) {
                     event.preventDefault();
                     let socket_route = (new_or_old_chat == 'new_chat') ? 'send_message_new_chat':'send_message';
+                    console.log(socket_route);
                     socket.emit(socket_route, { "sender_id": PLUGIN_SETINGS.UID, "group_id": GUID, "message": send_message_form.querySelector('#message-textarea').value }, (response) => {
                         if (response) {
                             console.log(response)
