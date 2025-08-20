@@ -8,124 +8,26 @@
     const SERVER_URL = 'http://localhost:5000' 
    // const SERVER_URL = 'https://acode-chat-backend.onrender.com';
     //const SERVER_URL = 'https://acode-chat-backend-production.up.railway.app/';
-   // const SERVER_URL = 'https://parental-kelci-nothinghjn-df173882.koyeb.app/';
+    //const SERVER_URL = 'https://parental-kelci-nothinghjn-df173882.koyeb.app/';
     let container_login_content = false;
     var menifest = {
         "id": "hackesofice.messanger"
     }
     
 
-let local_message_database = {
-        "group1": {
-            "1": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "2": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "3": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "4": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "5": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "6": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "7": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "8": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "9": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "10": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "11": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "12": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "13": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "14": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            },
-            "15": {
-                "sender_uid": "1020202020",
-                "sender_name": "John Doe",
-                "message": "this is a message",
-                "time_stamp": "2025-08-12T14:30:00Z"
-            }
-        }
-    }
-
-
-
-
-
 
     class messanger {
         constructor() { }
         async install() {
             const scriptURL = this.baseUrl + 'socket.js'; // not working
-            console.log(scriptURL);
+            //console.log(scriptURL);
             let dynamicScript = document.createElement('script');
             dynamicScript.src = 'https://cdn.jsdelivr.net/npm/socket.io-client@4/dist/socket.io.js';
             document.head.appendChild(dynamicScript);
             await new Promise((resolve) => {
                 dynamicScript.onload = resolve;
             });
+            
             
              acode.addIcon('messanger', `${this.baseUrl}icon.png`);
              
@@ -151,7 +53,47 @@ let local_message_database = {
             /////////////////// LETS DESIGN THE LOGIN UI PAGE ///////////////////////
             /////////////////////////////////////////////////////////////////////////
             /////////////////////////////////////////////////////////////////////////
+            /////////////////////////////////////////////////////////////////////////
+            async function resend_otp(otp_form){
+                otp_form.querySelector('#sub_p').remove()
+                otp_form.querySelector('#submit').disabled = true;
+                otp_form.querySelector('#submit').innerText='';
+                otp_form.querySelector('#submit').appendChild(show_loader());
+                const response = await fetch(`${SERVER_URL}/resend_otp`, {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        "COOKIE": settings.get(menifest.id).COOKIE,
+                        "UID": settings.get(menifest.id).UID
+                    }),
+                    headers:{
+                        "Content-Type": "application/json"
+                    }
+                });
+                
+                let resData = await response.json()
+                    //console.log(resData)
+                if (response.status_code == 200){
+                    otp_form.querySelector('#err_p').innerText = resData.message;
+                    setTimeout(()=>{
+                            otp_form.querySelector('#err_p').innerText = " ";
+                            otp_form.querySelector('#submit').innerText = 'Sign-Up';
+                            otp_form.querySelector('#submit').disabled = false;
+                    }, 3000)
+                }else {
+                    if (response){
+                        otp_form.querySelector('#err_p').innerText = resData.message;
+                        setTimeout(()=>{
+                            otp_form.querySelector('#err_p').innerText = " ";
+                            otp_form.querySelector('#submit').innerText = 'Sign-Up';
+                            otp_form.querySelector('#submit').disabled = false;
+                        }, 3000)
+                        // console.log(resData)
+                    }
+                }
+            }
+            
             async function try_sign_up(event, signup_form, container_refrence){
+                signup_form.querySelector('#submit').disabled = true;
                 signup_form.querySelector('#submit').innerText='';
                 signup_form.querySelector('#submit').appendChild(show_loader());
                 event.preventDefault();
@@ -190,7 +132,7 @@ let local_message_database = {
                                 UID: responseData.UID
                             }
                         });
-                        console.log(container_refrence);
+                      //  console.log(container_refrence);
                         /////////////// pass the body and append otp ///////////
                         show_otp_page(container_refrence)
                     }
@@ -200,32 +142,39 @@ let local_message_database = {
                         setTimeout(()=>{
                             signup_form.querySelector('#err_p').innerText = '';
                             signup_form.querySelector('#submit').innerText = 'Sign-Up';
+                            signup_form.querySelector('#submit').disabled = false;
                         },3000);
                         
                     }
                 }
                 else{
-                   // console.log(responseData)
+                    console.log(responseData)
                     signup_form.querySelector('#err_p').innerText = responseData.message;
                     setTimeout(()=>{
                         signup_form.querySelector('#err_p').innerText = '';
                         signup_form.querySelector('#submit').innerText = 'Sign-Up';
+                        signup_form.querySelector('#submit').disabled = false;
                     },3000)
                 }
                 
             }
             async function submit_otp(event, otp_form, container_refrence){
                 event.preventDefault();
-                let ENTERD_OTP = otp_form.querySelector('#otp_input').value;
-                let UID = settings.get(menifest.id).UID
-                let COOKIE = settings.get(menifest.id).COOKIE
-                
+                let ENTERD_OTP = "";
+                let UID = settings.get(menifest.id).UID;
+                let COOKIE = settings.get(menifest.id).COOKIE;
+                otp_form.querySelector('#submit').disabled = true;
+                otp_form.querySelector('#submit').innerText = " ";
+                otp_form.querySelector('#submit').appendChild(show_loader())
+                otp_form.querySelectorAll('input').forEach((element)=>{
+                    ENTERD_OTP = ENTERD_OTP + element.value;
+                });
                 const data = {
                     "COOKIE": COOKIE,
                     "UID":UID,
                     "ENTERD_OTP":ENTERD_OTP
                 }
-                console.log(data)
+               // console.log(data)
                 try {
                     const response = await fetch(`${SERVER_URL}/account_verification`, {
                         method: "POST",
@@ -238,14 +187,27 @@ let local_message_database = {
                     if (response) {
                         if (response.ok) {
                             const responseData = await response.json()
-                            console.log(responseData);
+                           // console.log(responseData);
                             otp_form.querySelector('#err_p').innerText = responseData.message
-                            console.log(responseData.TOKEN)
+                            setTimeout(()=>{
+                                otp_form.querySelector('#err_p').innerText = " ";
+                                otp_form.querySelector('#submit').disabled = false;
+                                otp_form.querySelector('#submit').innerText = "Verify";
+                                //otp_form.removeChild(otp_form.querySelector('#loader'))
+                            },3000)
+                          //  console.log(responseData.TOKEN)
+                            container_refrence.style.cssText = `height:100%; width:100%;`;
                             show_main_page(container_refrence, UID, responseData.TOKEN)
                         } else {
                             const responseData = await response.json()
                             console.log(responseData);
                             otp_form.querySelector('#err_p').innerText = responseData.message;
+                            setTimeout(()=>{
+                                otp_form.querySelector('#submit').disabled = false;
+                                otp_form.querySelector('#err_p').innerText = " ";
+                                otp_form.querySelector('#submit').innerText = "Verify";
+                               // otp_form.removeChild(otp_form.querySelector('#loader'));
+                            },3000)
                         }
                     }
                 } catch (err) {
@@ -268,7 +230,7 @@ let local_message_database = {
                // console.log(data);
                 // send the data to the server through POST method to appropriate endpoint
                 try {
-                    console.log(`${SERVER_URL}/login`);
+                    //console.log(`${SERVER_URL}/login`);
                     const response = await fetch(`${SERVER_URL}/login`, {
                         method: 'POST',
                         body: JSON.stringify(data),
@@ -289,7 +251,7 @@ let local_message_database = {
                             }
                         });
                         show_main_page(container_refrence, data.UID, data.TOKEN)
-                        console.log(data)
+                       // console.log(data)
                         // fire_socket() //contaimer isnt accessible so its useless
                     } else {
                         const data = await response.json();
@@ -328,7 +290,7 @@ let local_message_database = {
                                 });
                                 if (response.ok){
                                     const responseData = await response.json();
-                                    console.log(responseData)
+                                   // console.log(responseData)
                                     return responseData
                                 } else {
                                     if (response){
@@ -352,6 +314,30 @@ let local_message_database = {
                     return false
                 }
             }
+            async function fetch_old_messages(){
+                const response  = await fetch(`${SERVER_URL}/get_old_messages`, {
+                    method: 'POST',
+                    headers:{
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        UID: settings.get(menifest.id).UID,
+                        COOKIE: settings.get(menifest.id).COOKIE
+                    })
+                })
+                
+                if (response && response.ok){
+                    let data = await response.json();
+                    console.log(data);
+                    return data.groups_messages;
+                }else{
+                    console.log(response, await response.json())
+                    return false
+                }
+            }
+            
+            
+            
             function show_loader() {
                 let loader_div = document.createElement('div');
                     loader_div.style.cssText = 'height:10px; width:10px; margin:auto;'
@@ -385,35 +371,136 @@ let local_message_database = {
                 return loader_div
             }
             
+            
+            
             function show_otp_page(container_refrence){
               //  body.removeChild(body.querySelector('#singup_form'));
               //  body.querySelector('#legend_p').innerText = 'Verification';
                 while (container_refrence.firstChild){
                     container_refrence.removeChild(container_refrence.firstChild);
                 }
+                container_refrence.style.cssText = 'margin:auto;'
                 let otp_form = document.createElement('form');
                     otp_form.id = 'otp_form';
-                    otp_form.style.cssText = `margin:auto; margin-top: 30%; `;
+                    otp_form.style.cssText = `box-shadow:0px 0px 4px 1px; border-radius:10px; display:flex; flex-direction:column; align-items:center; row-gap:10px; padding:20px 10px`;
                     otp_form.onsubmit = (event) => {submit_otp(event, otp_form, container_refrence)}
                     container_refrence.appendChild(otp_form)
                     
-                    let otp_box = document.createElement('input');
-                        otp_box.id = 'otp_input';
-                        otp_box.name = 'otp';
-                        otp_box.placeholder = 'Enter OTP'
-                        otp_box.style.cssText = `margin-left:auto; margin-right:auto;`;
+                    let p1 = document.createElement('p');
+                        p1.style.cssText = 'font-weight:500; margin-top:35px;'
+                        p1.innerText = 'Welcome To';
+                    
+                    let p2 = document.createElement('p');
+                        p2.style.cssText = 'font-size:24px; margin-top:15px;'
+                        p2.innerText = 'messenger Ax';
+                        
+                    let p3 = document.createElement('p');
+                        p3.style.cssText = 'padding:5px 20px; box-shadow:1px 1px 2px -0px; border-radius:20px; margin-top:25px;'
+                        p3.innerText = 'OTP Verification';
+                        
+                    let p4 = document.createElement('p');
+                        p4.style.cssText = 'text-align:center; margin-top:15px; font-size:14px;';
+                        p4.innerText = "Enter The 6-digit code sent to your email/phone";
+                    
+                    otp_form.appendChild(p1)
+                    otp_form.appendChild(p2)
+                    otp_form.appendChild(p3)
+                    otp_form.appendChild(p4)
+                    let otp_box = document.createElement('div');
+                        otp_box.id = 'otp_box';
+                        otp_box.style.cssText = `margin-left:auto; margin-right:auto; display:flex; flex-direction:row; column-gap:3px; margin-top:10px; `;
                         otp_form.appendChild(otp_box)
+                        
+                        let digit_1 = document.createElement('input');
+                            digit_1.maxLength = 1;
+                            digit_1.type = 'text';
+                            digit_1.inputMode = 'numeric'
+                            digit_1.required = true;
+                            digit_1.autofocus = true;
+                            
+                            digit_1.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_1);
+                        
+                        let digit_2 = document.createElement('input');
+                            digit_2.maxLength = 1;
+                            digit_2.required = true;
+                            digit_2.type = 'text';
+                            digit_2.inputMode = 'numeric';
+                            digit_2.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_2);
+                        
+                        let digit_3 = document.createElement('input');
+                            digit_3.maxLength = 1;
+                            digit_3.required = true;
+                            digit_3.type = 'text';
+                            digit_3.inputMode = 'numeric';
+                            digit_3.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_3);
+                            
+                        let digit_4 = document.createElement('input');
+                            digit_4.maxLength = 1;
+                            digit_4.required = true;
+                            digit_4.type = 'text';
+                            digit_4.inputMode = 'numeric';
+                            digit_4.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_4);
+                            
+                        let digit_5 = document.createElement('input');
+                            digit_5.maxLength = 1;
+                            digit_5.required = true;
+                            digit_5.type = 'text';
+                            digit_5.inputMode = 'numeric';
+                            digit_5.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_5);
+                        
+                        let digit_6 = document.createElement('input');
+                            digit_6.maxLength = 1;
+                            digit_6.required = true;
+                            digit_6.type = 'text';
+                            digit_6.inputMode = 'numeric';
+                            digit_6.style.cssText = 'height:35px; width:25px; padding:0 8px; box-shadow:inset 0 0 6px 0px; border:none;';
+                            otp_box.appendChild(digit_6);
                     
                     let otp_submit = document.createElement('button');
                         otp_submit.type = 'submit';
+                        otp_submit.id = 'submit';
                         otp_submit.innerText = 'Verify';
-                        otp_submit.style.cssText = `padding:10px; margin-top:20%; border-radius:10px; border:none; background-color: grey;`;
+                        otp_submit.style.cssText = `width:50%; padding:8px 10px; margin-top:15%; border-radius:10px; border:none; background-color: transparent; box-shadow:inset 0px 0px 4px 0px;`;
                         otp_form.appendChild(otp_submit)
-                    
+                        
                     let err_p = document.createElement('span');
                         err_p.id = 'err_p';
+                        err_p.style.cssText = 'color:red;';
                         otp_form.appendChild(err_p);
+                    
+                    let number_count_down = document.createElement('p');
+                        number_count_down.id = "count_down";
                         
+                    let p5 = document.createElement('p');
+                        p5.style.cssText = 'text-align:center;'
+                        p5.innerHTML = "Don't recieved an code?";
+                        let sub_p = document.createElement('p');
+                            sub_p.id = 'sub_p';
+                            sub_p.style.cssText = 'color:blue; text-align:center;';
+                            sub_p.innerText = 'Resend OTP';
+                            sub_p.addEventListener('click', ()=>{resend_otp(otp_form)})
+                           p5.appendChild(sub_p);
+                        otp_form.appendChild(p5);
+                    // add move focus betwen otp bpxes
+                    const inputs = otp_box.querySelectorAll("input");
+                   // console.log(inputs.length)
+                             inputs.forEach((input, index)=>{
+                                 input.addEventListener('input', ()=>{
+                                     if (input.value.length === 1 && index < inputs.length - 1){
+                                         inputs[index+1].focus();
+                                     }
+                                 });
+                                 input.addEventListener('keydown', (e)=>{
+                                     if (e.key === 'Backspace' && input.value === "" && index > 0){
+                                         inputs[index - 1].focus();
+                                     }
+                                 })
+                             })
                 container_refrence.appendChild(otp_form)
             }
             
@@ -421,17 +508,16 @@ let local_message_database = {
             function sign_up_page(container_refrence) {
                 let section = document.createElement('section');
                     section.id = 'section';
-
                     let hader = document.createElement('fieldset');
                         hader.id = 'hader';
-                        hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:30px;border-radius: 10px; height: 60px; border: none; box-shadow:0 0 10px; width:80%;`;
+                        hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:30px;border-radius: 10px; border: none; box-shadow:0 0 10px; width:80%;`;
                         let center_hader1 = document.createElement('legend');
                             center_hader1.innerText = 'Welcome to';
-                            center_hader1.style.cssText = `margin-left:auto; margin-right: auto; border:none; padding:5px; box-shadow:0 0 10px; border-radius: 40%; padding:5px;`;
+                            center_hader1.style.cssText = `margin-left:auto; margin-right: auto; border:none; padding:5px; box-shadow:0 0 10px; border-radius: 40%; padding:5px;  text-shadow: 0px 0px 3px; font-weight:400;`;
                             hader.appendChild(center_hader1);
                         let p1 = document.createElement('p');
-                            p1.innerText = ' J U P I T E R ';
-                            p1.style.cssText = `text-align:center; latter-spacing:8px;`
+                            p1.innerText = ' messanger Ax';
+                            p1.style.cssText = `text-align:center; letter-spacing:8px; margin-top:10px; margin-bottom:5px; font-weight:1000; text-shadow:0 0 10px; margin-left:auto; margin-right:auto;`;
                             hader.appendChild(p1);
                             
                     let body = document.createElement('fieldset');
@@ -450,59 +536,66 @@ let local_message_database = {
                         let signup_form = document.createElement('form');
                             signup_form.id = 'singup_form';
                             signup_form.classList = 'scroll';
-                            signup_form.style.cssText = `overflow-y:auto; height:100%; margin-left:auto; margin-right:auto;`;
+                            signup_form.style.cssText = `overflow-y:auto; height:100%; margin-left:auto; margin-right:auto; display:flex; flex-direction:column; align-items:center; padding-top:10%;`;
                             signup_form.onsubmit = (event) => {try_sign_up(event, signup_form,container_refrence);}
                             
                             let first_name = document.createElement('input');
                                 first_name.name = 'first_name';
                                 first_name.id = 'first_name';
                                 first_name.placeholder = 'Enter Your first Name';
-                                first_name.style.cssText = `height:70px;`;
-                                first_name.className = 'input';
+                                first_name.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
+                                first_name.required = true;
                                 signup_form.appendChild(first_name);
                             
                             let last_name = document.createElement('input')
                                 last_name.name = 'last_name';
                                 last_name.id = 'last_name';
                                 last_name.placeholder = 'Enter your last name';
-                                last_name.className  = 'input';
+                                last_name.required = true;
+                                last_name.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
                                 signup_form.appendChild(last_name);
                             
                             let email = document.createElement('input');
                                 email.type = 'email';
                                 email.name = 'email';
                                 email.id = 'email';
-                                email.className = 'input';
+                                email.required = true;
                                 email.placeholder = 'enter email';
+                                email.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
                                 signup_form.appendChild(email);
                             
                             let phone = document.createElement('input');
                                 phone.type = 'number';
                                 phone.name = 'phone';
                                 phone.id = 'phone';
-                                phone.className = 'input';
-                                phone.placeholder = 'enter phone';
+                                phone.required = true;
+                                phone.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
+                                phone.placeholder = 'enter phone with prefix';
                                 signup_form.appendChild(phone);
                             
                             let dob = document.createElement('input')
                                 dob.type = 'date'
                                 dob.name = 'dob';
+                                dob.required = true;
                                 dob.placeholder = 'dd/mm/yy';
+                                dob.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
                                 signup_form.appendChild(dob)
                             
                             let pw = document.createElement('input');
                                 pw.name = 'password';
                                 pw.type = 'password';
                                 pw.id = 'pass';
-                                pw.className = 'input';
+                                pw.required = true;
                                 pw.placeholder = 'enter password';
+                                pw.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
                                 signup_form.appendChild(pw);
                                 
                             let confirm_pw = document.createElement('input');
                                 confirm_pw.type = 'text';
                                 confirm_pw.id = 'confirm_pw';
-                                confirm_pw.className = 'input';
+                                confirm_pw.required = true;
                                 confirm_pw.placeholder = 'Re Enter Your Password';
+                                confirm_pw.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px;`;
                                 signup_form.appendChild(confirm_pw);
                             
                             let err_p = document.createElement('p');
@@ -513,28 +606,28 @@ let local_message_database = {
                                 submit.type = 'submit';
                                 submit.id = 'submit';
                                 submit.innerText = 'Sign-Up';
+                                submit.style.cssText = `box-shadow:0 1px 2px; border:none; height:35px; width:60%; border-radius:10px; margin:10px auto;`;
                                 signup_form.appendChild(submit);
                             
                             body.appendChild(signup_form);
                             
-                    let style = document.createElement('style');
-                        style.textContent = `
-                            .input{
-                                background-color:red;
-                            }
-                        `;
+                //     let style = document.createElement('style');
+                //         style.textContent = `
+                //             #confirm_pw {
+                //                 border:5px solid black;
+                //             }
+                //         `;
                                 
                                 
-
+                // body.appendChild(style);
                 section.appendChild(hader);
                 section.appendChild(body);
-                section.appendChild(style);
-                
                 /// clar the container
                 while (container_refrence.firstChild){
-                    console.log('clearing')
+                   // console.log('clearing')
                     container_refrence.removeChild(container_refrence.firstChild);
                 }
+                //now updte thw container_refrence
                 container_refrence.appendChild(section)
             }
             
@@ -548,14 +641,14 @@ let local_message_database = {
 
                 let hader = document.createElement('fieldset');
                     hader.id = 'hader';
-                    hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:30px;border-radius: 10px; height: 60px; border: none; box-shadow:0 0 10px; width:80%;`;
+                    hader.style.cssText = `margin-left:auto; margin-right:auto; margin-top:30px;border-radius: 10px; border: none; box-shadow:0 0 10px; width:80%;`;
                     let center_hader1 = document.createElement('legend');
                         center_hader1.innerText = 'Welcome to';
-                        center_hader1.style.cssText = `margin-left:auto; margin-right: auto; border:none; padding:5px; box-shadow:0 0 10px; border-radius: 40%; padding:5px;`;
+                        center_hader1.style.cssText = `margin-left:auto; margin-right: auto; border:none; padding:5px; box-shadow:0 0 10px; border-radius: 40%; padding:5px;  text-shadow: 0px 0px 3px; font-weight:400; `;
                         hader.appendChild(center_hader1);
                     let p1 = document.createElement('p');
-                        p1.innerText = ' J U P I T E R ';
-                        p1.style.cssText = `text-align:center; latter-spacing:8px;`
+                        p1.innerText = 'messanger Ax';
+                        p1.style.cssText = `text-align:center; letter-spacing:8px; margin-top:10px; margin-bottom:5px; font-weight:1000; text-shadow:0 0 10px; margin-left:auto; margin-right:auto;`;
                         hader.appendChild(p1);
                 //container.appendChild(hader);
 
@@ -579,7 +672,7 @@ let local_message_database = {
                 email_input.required = true;
                 email_input.id = 'email';
                 email_input.placeholder = 'Enter Email';
-                email_input.style.cssText = `height:35px; display:block; margin-left:auto;margin-right:auto; margin-top:60px; border-top:none; border-left:none; border-right: none; box-shadow: 0 5px 10px;`;
+                email_input.style.cssText = `height:35px; display:block; margin-left:auto;margin-right:auto; margin-top:60px; border-top:none; border-left:none; border-right: none; box-shadow:0 2px 5px;`;
                 login_form.appendChild(email_input);
 
                 let pass = document.createElement('input');
@@ -588,14 +681,14 @@ let local_message_database = {
                 pass.required = true;
                 pass.id = 'pass';
                 pass.placeholder = 'Enter Password';
-                pass.style.cssText = `height:35px; display:block; margin-left:auto; margin-right:auto; margin-top:40px; border-top:none; border-left:none; border-right:none; box-shadow: 0 5px 10px;`;
+                pass.style.cssText = `height:35px; display:block; margin-left:auto; margin-right:auto; margin-top:40px; border-top:none; border-left:none; border-right:none; box-shadow:0 2px 5px;`;
                 login_form.appendChild(pass);
 
                 let submit = document.createElement('button');
                 submit.type = 'submit';
-                submit.innerText = 'SUBMIT';
+                submit.innerText = 'Login';
                 //submit.onClick = submit_data
-                submit.style.cssText = `display: block; margin-left:auto; margin-right:auto; margin-top:30px; margin-bottom:30px; background-color:transparent; padding:10px 20px; border-radius:30px;`;
+                submit.style.cssText = `display: block; margin-left:auto; margin-right:auto; margin-top:30px; margin-bottom:30px; background-color:transparent; padding:10px 20px; border-radius:30px; box-shadow:0 2px 5px; border:none; text-decoration:bold;`;
                 login_form.appendChild(submit);
 
                 let errP = document.createElement('p');
@@ -624,10 +717,10 @@ let local_message_database = {
                 section.appendChild(hader);
                 section.appendChild(body);
                 
-                console.log('Showing Conyainer refrence', container_refrence)
+                //console.log('Showing Conyainer refrence', container_refrence)
                 //clear contaoner
                 while (container_refrence.firstChild){
-                    console.log('clearing')
+                    //console.log('clearing')
                     container_refrence.removeChild(container_refrence.firstChild);
                 }
                 container_refrence.appendChild(section);
@@ -640,8 +733,11 @@ let local_message_database = {
             ////////////////// chats or all users page//////////////////
             /////////////////////////////////////////////////////
             /////////////////////////////////////////////////////
-            function show_main_page(container_refrence, UID, TOKEN) {
+            async function show_main_page(container_refrence, UID, TOKEN) {
                 // const PLUGIN_SETINGS = settings.get([menifest.id]);
+                let socket = io.connect(SERVER_URL);
+                let all_chats_messages_database = await fetch_old_messages();
+                console.log('this is from ', all_chats_messages_database)
                 try {
                     while (container_refrence.firstChild) {
                         container_refrence.removeChild(container_refrence.firstChild);
@@ -676,13 +772,13 @@ let local_message_database = {
                     let chats_div = document.createElement('div')
                     chats_div.style.cssText = 'padding:3px 10px; border:none; border-radius:10px; box-shadow:0 1px 2px;'
                     chats_div.innerText = 'CHATS';
-                    chats_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,body, list, 'chats')}
+                    chats_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,socket,body, list, 'chats', all_chats_messages_database)}
                     legend2_div.appendChild(chats_div);
 
                     let users_div = document.createElement('div');
                     users_div.innerText = 'USERS'
                     users_div.style.cssText = 'padding:3px 10px; border:none; border-radius:10px; box-shadow:0 1px 2px;'
-                    users_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,body, list, 'users')}
+                    users_div.onclick = ()=>{get_and_show_chats_or_users_list(UID, TOKEN,container_refrence,socket,body, list, 'users', all_chats_messages_database)}
                     legend2_div.appendChild(users_div);
                     legend2.appendChild(legend2_div);
                     body.appendChild(legend2);
@@ -702,39 +798,76 @@ let local_message_database = {
                     container_refrence.appendChild(section);
                     body.appendChild(aside);
                     chats_div.click()
+                    start_listening_for_new_messages(container_refrence, socket);
+                    
                 } catch (err) {
                     console.log(err)
                 }
             }
             
-           async function get_and_show_chats_or_users_list(UID, TOKEN, container_refrence, body,list, what_to_show) {
-               let socket = io.connect(SERVER_URL);
-               start_listening_for_new_messages(container_refrence, socket);
-                
-                
+           async function get_and_show_chats_or_users_list(UID, TOKEN, container_refrence, socket, body,list, what_to_show, all_chats_messages_database) {
+
                 let style = document.createElement('style')
-                    body.insertBefore(style, body.lastChild)
-                    style.textContent = ` 
+                body.insertBefore(style, body.lastChild)
+                style.textContent = ` 
                             .active {
                                 background-color:skyblue;
                             }
                         `;
-                    console.log(body)
+                // console.log(body)
                 if (what_to_show == 'chats') {
-                    console.log(body.firstChild.firstChild.firstChild.classList)
-                    if (body.firstChild.firstChild.firstChild.classList.contains('active')){
-                        return 
+                   // console.log(body.firstChild.firstChild.firstChild.classList)
+                    if (body.firstChild.firstChild.firstChild.classList.contains('active')) {
+                        return
                     }
                     body.firstChild.firstChild.firstChild.classList.add('active')
                     body.firstChild.firstChild.lastChild.classList.remove('active')
-                    console.log(body.firstChild.firstChild.firstChild)
-                    console.log('chats clicked')
+                    //console.log(body.firstChild.firstChild.firstChild)
+                    //console.log('chats clicked')
                     try {
                         while (body.lastChild.firstChild.firstChild) {
                             body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
                         }
                         body.appendChild(show_loader())
-                        socket.on('connect', () => {
+                        if (!socket.conncted) {
+                           // socket.on('connect', () => {
+                                socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
+                                    if (response.status_code == 200) {
+                                        body.removeChild(body.querySelector('#loader'));
+                                        let data = response.chats;
+                                        Object.keys(data).forEach(key => {
+                                            let list_item = document.createElement('li');
+                                            list_item.id = key;
+                                            //list_item.innerText = CHATS_OBJECT[key]['name'];
+                                            list_item.style.cssText = `height:35px; padding:5px 5px 5px 7px; box-shadow:0 1px 3px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 20px; display:flex; flex-direction:row; column-gap:10px`;
+                                            list_item.addEventListener('click', () => {
+                                                //list_item.style.cssText ="background-color:blue";
+                                                if (editorManager.getFile('messanger_tab', 'id')) {
+                                                    editorManager.getFile('messanger_tab', 'id').remove();
+                                                }
+                                                //console.log(key, CHATS_OBJECT[key]['NAME'])
+                                                open_chat(key, data[key]['NAME'], all_chats_messages_database, socket, 'old_chat')
+                                            });
+
+                                            let chat_logo = document.createElement('div');
+                                            chat_logo.style.backgroundImage = ``;
+                                            chat_logo.style.cssText = `border:none; border-radius:50%; height:35px; width:35px; background-size:cover; background-image:url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
+                                            list_item.appendChild(chat_logo);
+                                            let name_text = document.createElement('p');
+                                            name_text.style.cssText = `margin-top:auto; margin-bottom:auto; overflow-y:auto;`;
+                                            name_text.innerText = data[key]['NAME'];
+                                            list_item.appendChild(name_text);
+
+                                            list.appendChild(list_item);
+                                        });
+                                    } else {
+                                        alert(response.message);
+                                        show_login_page(container_refrence);
+                                    }
+                                });
+                          //  });
+                        }
+                        else {
                             socket.emit('get_all_chat_list', { "UID": UID, "TOKEN": TOKEN }, (response) => {
                                 if (response.status_code == 200) {
                                     body.removeChild(body.querySelector('#loader'));
@@ -750,7 +883,7 @@ let local_message_database = {
                                                 editorManager.getFile('messanger_tab', 'id').remove();
                                             }
                                             //console.log(key, CHATS_OBJECT[key]['NAME'])
-                                            open_chat(key, data[key]['NAME'], local_message_database["group_1"], socket, 'old_chat')
+                                            open_chat(key, data[key]['NAME'], all_chats_messages_database, socket, 'old_chat')
                                         });
 
                                         let chat_logo = document.createElement('div');
@@ -769,19 +902,19 @@ let local_message_database = {
                                     show_login_page(container_refrence);
                                 }
                             });
-                        });
+                        }
                     } catch (err) {
                         console.log(err)
                     }
                 } else if (what_to_show == 'users') {
-                    if(body.firstChild.firstChild.lastChild.classList.contains('active')){
+                    if (body.firstChild.firstChild.lastChild.classList.contains('active')) {
                         return
                     }
                     // console.log('users clicked')
                     body.firstChild.firstChild.firstChild.classList.remove('active');
                     body.firstChild.firstChild.lastChild.classList.add('active');
                     //console.log(body.lastChild.firstChild.firstChild)
-                    while(body.lastChild.firstChild.firstChild){
+                    while (body.lastChild.firstChild.firstChild) {
                         body.lastChild.firstChild.firstChild.remove(body.lastChild.firstChild.firstChild)
                     }
                     body.appendChild(show_loader())
@@ -793,16 +926,16 @@ let local_message_database = {
                             },
                             body: JSON.stringify({
                                 "UID": UID,
-                                "TOKEN":TOKEN
+                                "TOKEN": TOKEN
                             })
-                            
+
                         });
                         if (response.ok) {
                             const data = await response.json();
                             body.removeChild(body.querySelector('#loader'))
                             Object.keys(data).forEach(key => {
                                 let list_item = document.createElement('li');
-                                list_item.id = UID + '_' + key;
+                                list_item.id = UID + '0000000000000000' + key;
                                 //list_item.innerText = CHATS_OBJECT[key]['name'];
                                 list_item.style.cssText = `height:35px; padding:5px 5px 5px 7px; box-shadow:0 1px 3px; width:90%; border:none; margin-left:auto; margin-right:auto; margin-top:10px; border-radius: 20px; display:flex; flex-direction:row; column-gap:10px`;
 
@@ -812,7 +945,7 @@ let local_message_database = {
                                         editorManager.getFile('messanger_tab', 'id').remove();
                                     }
                                     //console.log(key, CHATS_OBJECT[key]['NAME'])
-                                    open_chat(UID + '_' + key, data[key]['NAME'], local_message_database["group_1"], socket, 'new_chat')
+                                    open_chat(UID + '0000000000000000' + key, data[key]['NAME'], all_chats_messages_database, socket, 'new_chat')
                                 });
 
                                 let chat_logo = document.createElement('div');
@@ -826,7 +959,7 @@ let local_message_database = {
 
                                 list.appendChild(list_item);
                             });
-                        }else{
+                        } else {
                             console.log(await response.json())
                         }
                     } catch (err) {
@@ -834,7 +967,49 @@ let local_message_database = {
                     }
                 }
             }
+            function show_message(message_data, tab_messages_container) {
+                let others_message = document.createElement('fieldset');
+                //console.log(settings.get(menifest.id));
+                console.log(message_data, 'this is showing')
+                const me = message_data.sender_id == settings.get(menifest.id)['UID'];
+                if (!me) {
+                    others_message.style.cssText = "max-width:70%; min-width:30%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-right:auto;";
+                    let sender_legend = document.createElement('legend');
+                    sender_legend.style.cssText = 'margin-left:-20px; display:flex; flex-direction:row; column-gap:3px;border-radius: 5px;';
 
+                    let sender_profile_pic = document.createElement('div');
+                    sender_profile_pic.style.cssText = "height:15px; width:15px; border-radius:5px; margin-top:2px;";
+                    sender_profile_pic.style.backgroundImage = `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
+                    sender_profile_pic.style.backgroundSize = 'cover';
+                    sender_legend.appendChild(sender_profile_pic);
+
+                    let sender_name = document.createElement('p');
+                    sender_name.innerText = message_data.sender_name;
+                    sender_legend.appendChild(sender_name);
+
+                    others_message.appendChild(sender_legend);
+                    let message = document.createElement('p');
+                    message.style.cssText = 'font-weight:500; overflow-x:auto; margin-right:auto;';
+                    message.innerText = message_data.message
+                    others_message.appendChild(message);
+                } else {
+                    others_message.style.cssText = "max-width:70%; min-width:20%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-left:auto;";
+                    let message = document.createElement('p');
+                    message.style.cssText = 'font-weight:500; overflow-x:auto; margin-left:auto;';
+                    message.innerText = message_data.message
+                    others_message.appendChild(message);
+                }
+
+                tab_messages_container.appendChild(others_message);
+                setTimeout(()=>{
+                tab_messages_container.scrollTo({
+                                            top: tab_messages_container.scrollHeight,
+                                            behavior: 'smooth'
+                            });
+                })
+            }
+            
+            
             function start_listening_for_new_messages(container_refrence, socket){
                     /// now ill get the chat id of each message new
                     /// then ill grab the all avilable tabs ids
@@ -844,51 +1019,19 @@ let local_message_database = {
                 // trigger new message evwnt on mew message
                 socket.on('new_message', (data) => {
                     console.log(data)
-                    console.log(window.editorManager.files)
+                  //  console.log(window.editorManager.files)
                     //window.toast(data.message);
+                    
                     if (window.editorManager.files) {
                         window.editorManager.files.forEach((file) => {
                             if (file.id) {
-                                console.log(file.id)
+                            //    console.log(file.id)
                                 if (file.id.includes(data.group_id)) {
-                                    console.log('yess same group is opend on big screen append message');
+                                  //  console.log('yess same group is opend on big screen append message');
                                     let tab = editorManager.getFile(`messanger_tab_${data.group_id}`, 'id');
                                     let tab_messages_container = tab.content.shadowRoot.querySelector(`#chats_elemnt_${data.group_id}`);
                                         
-                                    let others_message = document.createElement('fieldset');
-                                        console.log(settings.get(menifest.id));
-                                        
-                                        const me = data.sender_id == settings.get(menifest.id)['UID'];
-                                        if(!me){
-                                            others_message.style.cssText = "max-width:70%; min-width:30%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-right:auto;";
-                                            let sender_legend = document.createElement('legend');
-                                                sender_legend.style.cssText = 'margin-left:-20px; display:flex; flex-direction:row; column-gap:3px;border-radius: 5px;';
-
-                                                let sender_profile_pic = document.createElement('div');
-                                                    sender_profile_pic.style.cssText = "height:15px; width:15px; border-radius:5px; margin-top:2px;";
-                                                    sender_profile_pic.style.backgroundImage = `url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSBmFKzyL1zd267I4OYwckhj8-VDM1030AU2w&s')`;
-                                                    sender_profile_pic.style.backgroundSize = 'cover';
-                                                    sender_legend.appendChild(sender_profile_pic);
-                                                    
-                                                let sender_name = document.createElement('p');
-                                                    sender_name.innerText = 'hackesofice';
-                                                    sender_legend.appendChild(sender_name);
-                                                    
-                                                others_message.appendChild(sender_legend);
-                                            let message = document.createElement('p');
-                                                message.style.cssText = 'font-weight:500; overflow-x:auto; margin-right:auto;';
-                                                message.innerText = data.message
-                                                others_message.appendChild(message);
-                                        } else {
-                                            others_message.style.cssText = "max-width:70%; min-width:20%; display:flex; flex-direction:row; column-gap:20px; border:none; border-radius:10px; box-shadow:0 1px 2px; padding:10px; margin-left:auto;";
-                                            let message = document.createElement('p');
-                                                message.style.cssText = 'font-weight:500; overflow-x:auto; margin-left:auto;';
-                                                message.innerText = data.message
-                                                others_message.appendChild(message);
-                                        }
-                                        
-                                    tab_messages_container.appendChild(others_message);
-                                    
+                                    show_message(data, tab_messages_container)
                                     // auto scrall tp last message
                                         tab_messages_container.scrollTo({
                                             top: tab_messages_container.scrollHeight,
@@ -920,12 +1063,24 @@ let local_message_database = {
 
 
             async function run_main(container_refrence){
-                console.log('youre online now')
+               // console.log('youre online now')
                 if (!settings.get(menifest.id)){
                    show_login_page(container_refrence); 
                 }else{
                     const UID = settings.get(menifest.id).UID;
                     if (UID) {
+                        if(!navigator.onLine){
+                            alert('youre offline')
+                            window.addEventListener('online', ()=> {
+                                console.log('re runnig ')
+                                run_main(container_refrence)
+                                
+                            });
+                            window.addEventListener('offline', ()=>{
+                                console.log('re runnig you gone offline')
+                                run_main(container_refrence)
+                            })
+                        }else{
                         const data = await try_cookie_login(container_refrence);
                         if (data.TOKEN) {
                             console.log('showing chats')
@@ -947,6 +1102,7 @@ let local_message_database = {
                                 }
                             }
                         }
+                    }
                     } else {
                         // means we have no uid or cookie stored
                         show_login_page(container_refrence);
@@ -960,10 +1116,10 @@ let local_message_database = {
                 if (PLUGIN_SETINGS) {
                     event.preventDefault();
                     let socket_route = (new_or_old_chat == 'new_chat') ? 'send_message_new_chat':'send_message';
-                    console.log(socket_route);
+                    //console.log(socket_route);
                     socket.emit(socket_route, { "sender_id": PLUGIN_SETINGS.UID, "group_id": GUID, "message": send_message_form.querySelector('#message-textarea').value }, (response) => {
                         if (response) {
-                            console.log(response)
+                           // console.log(response)
                             if (response.status_code == 200) {
                                 window.toast(response.message)
                             } else {
@@ -1157,7 +1313,7 @@ let local_message_database = {
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////////////
-            function open_this_chat_on_new_tab(id, name, messagesData, container, socket, new_or_old_chat){
+            function open_this_chat_on_new_tab(id, name, all_chats_messages_database, container, socket, new_or_old_chat){
                 let main_page = document.createElement('div');
                     main_page.id = 'idds';
                     main_page.style.cssText = 'min-height:99%; max-height:99%; min-width:99%;  max-width:99%; display:flex; flex-direction:column; border:1px dotted black; margin-left:auto; margin-right:auto;';
@@ -1183,7 +1339,7 @@ let local_message_database = {
                            // top_container_or_heder_strip.appendChild(logo_and_title_div);
                                 
                     ///// ///////////////////////////////////
-                    /////// center or chats container///////
+                    /////// center or chats container whenre message are going to display///////
                     ////////////////////////////////////////
                     let centre_container_or_message_area = document.createElement('div');
                         centre_container_or_message_area.style.cssText = "min-width:95%; max-width:95%; min-height:100%; max-height:100%; flex-grow: 1; display:flex; margin-left:auto; margin-right:auto; ";
@@ -1194,7 +1350,7 @@ let local_message_database = {
                             actual_message_container.style.cssText = 'flex-grow:1; overflow-y:auto; min-height:90%; max-height:90%; display:flex; flex-direction:column; row-gap:10px; padding:20px; ';
                             centre_container_or_message_area.appendChild(actual_message_container);
                             
-                            
+
                                 //actual_message_container.appendChild(others_message)
                                     
                                     
@@ -1231,9 +1387,20 @@ let local_message_database = {
                 main_page.appendChild(top_container_or_heder_strip);
                 main_page.appendChild(centre_container_or_message_area);
                 main_page.appendChild(bottom_container_or_message_writing_area);
-                
                 container.appendChild(main_page);
-                console.log(container)
+                //console.log(container)
+                
+                // now ill call show_message() function to append each message if avilable
+                console.log('checking ', all_chats_messages_database)
+                if (all_chats_messages_database && all_chats_messages_database[id]){
+                    let this_group_messages = all_chats_messages_database[id]
+                    console.log(this_group_messages, ' this is from chays databasr')
+                    if (this_group_messages){
+                        Object.keys(this_group_messages).forEach((message)=>{
+                            show_message(this_group_messages[message],actual_message_container)
+                        })
+                    }
+                }
                 return true
             }
 
@@ -1247,8 +1414,8 @@ let local_message_database = {
 
 
             function runfunctionWhenSelected(container) {
-                console.log("FIRED FUNCTION 2");
-                console.log(container)
+               // console.log("FIRED FUNCTION 2");
+               // console.log(container)
                 //let sidebar_main_div = container.querySelector('#messanger-div');
             }
             // function show_on_sidebar(container) {
@@ -1277,14 +1444,14 @@ let local_message_database = {
             ///////////////////////////////////////////////////////////////
             ///////////////////////////////////////////////////////////////
             
-            function open_chat(id, name, messagesData, socket, new_or_old_chat){
+            function open_chat(id, name, all_chats_messages_database, socket, new_or_old_chat){
                 let container = document.createElement("div");
                     container.style.cssText = 'margin-bottom:0; width:100%; height:99%;';
                     
                     // let section = document.createElement('section');
                     //     container.appendChild(section);
                     // pass the container and appned the ui of chat
-                    open_this_chat_on_new_tab(id, name,messagesData, container, socket, new_or_old_chat)
+                    open_this_chat_on_new_tab(id, name, all_chats_messages_database, container, socket, new_or_old_chat)
                 
                 // pass the container tó enable edits
                 const tab = new editorFile(name, {
