@@ -10,7 +10,7 @@
   "license":"",
   "changelogs":"changelogs.md",
   "keywords":["chat", "acode chat", "messanger", "Messanger-Ax"],
-  "price":10000,
+  "price":0,
   "repository":"https://github.com/hackesofice/Acode-messanger.git",
   "author":{
     "name":"HACKESOFICE",
