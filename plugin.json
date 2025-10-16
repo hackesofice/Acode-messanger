@@ -9,9 +9,9 @@
   "minVersionCode":290,
   "license":"",
   "changelogs":"changelogs.md",
-  "keywords":["Live Server","live","HTML Viewer"],
+  "keywords":["chat", "acode chat", "messanger", "Messanger-Ax"],
   "price":10000,
-  "repository":"https://github.com/hackesofice/Acode-Browser.git",
+  "repository":"https://github.com/hackesofice/Acode-messanger.git",
   "author":{
     "name":"HACKESOFICE",
     "email":"hackesofice@gmail.com",
