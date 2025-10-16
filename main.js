@@ -1,7 +1,7 @@
 "use strict";
 
 (() => {
-    const DEVELOPMENT_MODE = true;
+    const DEVELOPMENT_MODE = false;
     const PLUGIN_ID = "hackesofice.messanger_Ax";
     
     // Acode dependencies
@@ -12,14 +12,7 @@
     const fs = acode.require('fs');
     const browser = window.cordova.plugin.http;
     const websocket = window.cordova.websocket;
-
-    // Server configuration
-    // const SERVER_URL = 'https://45b06be2-991f-48d8-98af-45fc60209943-00-350b3tbgns8g6.pike.replit.dev';
-    // const SERVER_URL = 'https://acode-chat-backend.onrender.com';
-    // const SERVER_URL = 'https://acode-chat-backend-production.up.railway.app';
     const SERVER_URL = 'http://fi5.bot-hosting.net:22148'
-
-    let containerLoginContent = false;
 
     // CSS Design System
     const CSS_VARS = {
@@ -115,7 +108,7 @@
         #trackForEvents() {
             setInterval(() => {
                 this.#tracker();
-              //  console.log('tracking ', this.onLine ? 'online' : 'offline');
+              //  ('tracking ', this.onLine ? 'online' : 'offline');
             }, 3000);
         }
 
@@ -843,16 +836,17 @@
                 const data = rawData.content || rawData;
                 ConsoleManager.log('New message received:', data);
 
-                NotificationManager.showToast(this.converter.makeUnSafe(data.MESSAGE));
-
                 // Check if message group is open in editor
                 if (window.editorManager.files) {
+                    let isDisplayed = false;
                     window.editorManager.files.forEach((file) => {
                         if (file.id && file.id.includes(data.GROUP_ID)) {
                             this.displayMessageInChat(data, file);
+                            isDisplayed = true;
                             return;
                         }
                     });
+                    isDisplayed ? {} : data.SENDER_ID == SettingsManager.getUid() ? {} : NotificationManager.showToast(this.converter.makeUnSafe(data.MESSAGE))
                 }
 
                 // Store message in local database

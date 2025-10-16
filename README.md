@@ -2,9 +2,15 @@
 
 A feature-rich, real-time messaging plugin for Acode editor that allows you to chat with other users while coding. Built with modern UI design and real-time WebSocket communication.
 
+> note this plugin is fully open source at [hear](https://github.com/hackesofice/Acode-messanger.git) and it usage [**Chat-API** as backend which is also open source at hear](https://github.com/offiicialkamal/Chat-API.git)
+
 ![Messenger Ax](https://img.shields.io/badge/Acode-Plugin-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+![downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Facode.app%2Fapi%2Fplugin%2Fhackesofice.messanger_Ax&query=downloads&style=for-the-badge&label=Downloads&labelColor=363a4f&color=c084fc&logo=download)
+
+## BACKEND INFORMATION
+
+this plugin usage [this repository](https://github.com/offiicialkamal/Chat-API.git) which is written in FastAPI (python)
 
 ## ✨ Features
 
@@ -74,15 +80,14 @@ A feature-rich, real-time messaging plugin for Acode editor that allows you to c
 - **Message Status**: See when messages were sent
 - **Chat History**: Access previous conversations
 
-## 🛠️ Configuration
+## 🛠️ Configuration for contributors
 
 ### Server Configuration
 The plugin connects to a messaging server. Default server URL is:
 ```
-http://localhost:5000
+http://fi5.bot-hosting.net:22148
 
 ```
-
 
 To change the server URL, modify the `SERVER_URL` constant in the plugin code.
 
@@ -207,27 +212,14 @@ We welcome contributions! Please feel free to submit pull requests, report bugs,
 4. Test thoroughly
 5. Submit a pull request
 
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
 ## 🆘 Support
 
 If you need help with the plugin:
 
 1. **Check this README** for solutions
-2. **Open an issue** on GitHub
+2. **[Open an issue](https://github.com/hackesofice/Acode-messanger/issues)** on GitHub
 3. **Contact support** via email
-4. **Join our community** chat
 
-## 🔄 Changelog
-
-### Version 1.0.0
-- Initial release
-- Real-time messaging
-- User authentication
-- Profile management
-- Modern UI design
 
 ## 🙏 Acknowledgments
 
