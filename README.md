@@ -4,6 +4,8 @@ A feature-rich, real-time messaging plugin for Acode editor that allows you to c
 
 > note this plugin is fully open source at [hear](https://github.com/hackesofice/Acode-messanger.git) and it usage [**Chat-API** as backend which is also open source at hear](https://github.com/offiicialkamal/Chat-API.git)
 
+##### Develomemt is in progress .....
+
 ![Messenger Ax](https://img.shields.io/badge/Acode-Plugin-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
 ![downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Facode.app%2Fapi%2Fplugin%2Fhackesofice.messanger_Ax&query=downloads&style=for-the-badge&label=Downloads&labelColor=363a4f&color=c084fc&logo=download)
