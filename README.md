@@ -1,77 +1,242 @@
-# Desclaimer
+# Messenger Ax - Acode Plugin
 
-> warning its a useless browser and you might going to waste your money.
+A feature-rich, real-time messaging plugin for Acode editor that allows you to chat with other users while coding. Built with modern UI design and real-time WebSocket communication.
 
-This is a kind of mini browser, A Developer needs to surf over internet to gethare information, for now theres no easy way to surf in the acode app so we created this as an solution. we are working to make it more and more capeble
+![Messenger Ax](https://img.shields.io/badge/Acode-Plugin-blue)
+![Version](https://img.shields.io/badge/Version-1.0.0-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
-> Warning !
-> for now its not much usefull work is still in progress soon well provide a major update of it
+## ✨ Features
+
+### 🔐 Authentication & Security
+- **Secure Login/Logout** with session management
+- **User Registration** with email verification
+- **OTP Verification** for account security
+- **Password Reset** functionality
+- **Auto-login** with cookie-based sessions
+- **Safe message encoding/decoding**
+
+### 💬 Messaging
+- **Real-time messaging** via WebSocket
+- **Group chats** and direct messages
+- **Typing indicators**
+- **Message timestamps**
+- **Online/Offline status**
+- **Message history** persistence
+
+### 🎨 User Interface
+- **Modern Dark Theme** with customizable colors
+- **Smooth Animations** and transitions
+- **Responsive Design** for mobile and desktop
+- **Intuitive Chat Interface**
+- **Custom Avatars** and user profiles
+- **Search functionality** for users and chats
+
+### 👤 Profile Management
+- **Edit personal information**
+- **Change password**
+- **Update profile picture**
+- **Theme preferences**
+- **Notification settings**
+
+### 🔧 Technical Features
+- **Offline Support** with network detection
+- **Automatic Reconnection** for WebSocket
+- **Error Handling** with user-friendly messages
+- **Loading States** and progress indicators
+- **Cross-platform compatibility**
+
+## 🚀 Installation
+
+1. Open **Acode Editor**
+2. Go to **Settings** → **Plugins**
+3. Search for **"Messenger Ax"**
+4. Click **Install**
+5. Restart Acode
+
+## 📱 Usage
+
+### Getting Started
+1. After installation, click on the **Messenger icon** in the sidebar
+2. **Create an account** or **login** if you already have one
+3. Verify your email with the **OTP code** sent to your inbox
+4. Start chatting!
+
+### Basic Functions
+- **Start New Chat**: Click the "New Chat" button and search for users
+- **Send Messages**: Type in the message input and press Enter or click Send
+- **View Profile**: Click on your profile picture in the sidebar
+- **Search Chats**: Use the search bar to find specific conversations
+
+### Chat Features
+- **Real-time Updates**: See messages instantly as they arrive
+- **Typing Indicators**: Know when someone is typing
+- **Message Status**: See when messages were sent
+- **Chat History**: Access previous conversations
+
+## 🛠️ Configuration
+
+### Server Configuration
+The plugin connects to a messaging server. Default server URL is:
+```
+http://localhost:5000
+
+```
 
 
+To change the server URL, modify the `SERVER_URL` constant in the plugin code.
 
-# installation steps
+### Theme Customization
+The plugin uses CSS variables for theming. You can customize:
+- Primary colors
+- Background colors
+- Text colors
+- Accent colors
 
-`step 1` install the Acode app form play store.
+## 🔌 API Endpoints
 
-`step 2` tap on menu icon avilable on the uooer left corner.
+The plugin uses the following server endpoints:
 
-`step 3` tap on _extension_ icon.
+### Authentication
+- `POST /login` - User login
+- `POST /sign_up` - User registration
+- `POST /account_verification` - OTP verification
+- `POST /resend_otp` - Resend verification code
+- `POST /get_token` - Session token validation
+- `POST /forgot_password` - Password reset request
+- `POST /reset_password` - Password reset
 
-`steo 4` type _Brouser_ on the search baar.
+### Messaging
+- `POST /get_old_messages` - Fetch message history
+- `POST /get_all_users` - Get user list
+- `WebSocket /ws` - Real-time messaging
 
-`step 5` tap on the result ( The Plugin you're seeing ).
+### Profile
+- `POST /get_settings_data` - Get user profile
+- `PATCH /get_settings_data` - Update user profile
 
-`step 6` tap on _install_ button 
+## 🎨 UI Components
 
-# how to use
+### Message Bubbles
+- **Sent messages** appear on the right with primary color
+- **Received messages** appear on the left with surface color
+- **Timestamps** show relative time (now, 2m ago, 1h ago)
 
-`step 1` tap on menu icon avilable on the uooer left corner.
+### Loading States
+- **Button loaders** for form submissions
+- **Content loaders** for chat lists
+- **Skeleton screens** for better UX
 
-`step 2` Now you'll see new Brouser icon on the top right corner tap on it to access.
+### Notifications
+- **Toast notifications** for important events
+- **Error messages** with detailed information
+- **Success confirmations** for completed actions
 
-`step 3` The mini app will be opend on the sidebar
+## 🔒 Security Features
 
-`note`
-> The plugin is under heavy / active Developement phrase and may be sometimes you'll face some errors and featurs may not work as expected but we are trying to improve it and soon it will be in its 100% working phrase
-# Different tabs amd buttons
+### Data Protection
+- **Message Encryption** using safe encoding
+- **Secure Authentication** with tokens
+- **Input Validation** on all forms
+- **XSS Protection** through content sanitization
 
-*search bar*
-youll see a searcg bar on the top you can type your query or entire url on it
+### Session Management
+- **Automatic session renewal**
+- **Secure cookie storage**
+- **Logout from all devices** support
 
-*Go Button*
-after typing url you'll need to tap on this button to see the search result.
+## 🐛 Troubleshooting
 
-*Quick access bar*
-this is a horizontal bar where youll find recently used tools and if you wanna open any of them again then just tap on it and it will quickly open on the main screen.
+### Common Issues
 
-*main screen*
-this is described on the last of the page
+1. **Connection Failed**
+   - Check your internet connection
+   - Verify server URL is correct
+   - Ensure server is running
 
-*all Apps bars*
-now at last youll see Two vertical bars hear youll find all avilable quick apps and we will expend it in future
+2. **Login Issues**
+   - Verify email and password
+   - Check if email is verified
+   - Try password reset if needed
+
+3. **Messages Not Sending**
+   - Check WebSocket connection
+   - Verify recipient is online
+   - Check message encoding
+
+4. **UI Not Loading**
+   - Restart Acode
+   - Reinstall plugin
+   - Clear plugin cache
+
+### Debug Mode
+Enable debug mode by setting `DEVELOPMENT_MODE = true` in the plugin code to see detailed logs.
+
+## 📝 Development
+
+### Building from Source
+1. Clone the repository
+2. Modify the plugin code
+3. Test in Acode development environment
+4. Package for distribution
+
+### File Structure
+```
+messenger-ax/
+├── main.js # Main plugin file
+├── icon.png # Plugin icon
+├── README.md # This file
+└── styles/ # Additional styles (if any)
+
+```
 
 
-# main screen
+### Dependencies
+- Acode Editor API
+- Cordova HTTP Plugin
+- Cordova WebSocket Plugin
 
-this is a main screen where youll see -
+## 🤝 Contributing
 
-*left button*
-To go back to previous page just tap on it
+We welcome contributions! Please feel free to submit pull requests, report bugs, or suggest new features.
 
-*right button*
-if you wanna go to the next page again just tap on it and it will take you to the next page
+### Contribution Guidelines
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-*full screen button*
-if you tap on  it then your current page will be opend on big screen and youll able to access this brouser on a big screen
+## 📄 License
 
-*X icon*
-If you tap on this icon your any opend any page will be closed and youll see a default page
+This project is licensed under the MIT License - see the LICENSE file for details.
 
+## 🆘 Support
 
+If you need help with the plugin:
 
-`note`
-> if you have any concerns about it plese open a issue on github page we will do our best to resolve the issue
+1. **Check this README** for solutions
+2. **Open an issue** on GitHub
+3. **Contact support** via email
+4. **Join our community** chat
 
-# Contributions
+## 🔄 Changelog
 
-the plugin is open source everythig is open and we welcome any kind of contributions, make sure proper information is provided in push request
+### Version 1.0.0
+- Initial release
+- Real-time messaging
+- User authentication
+- Profile management
+- Modern UI design
+
+## 🙏 Acknowledgments
+
+- **Acode Team** for the excellent editor platform
+- **Contributors** who helped improve this plugin
+- **Testers** for valuable feedback
+- **Users** for making this plugin better
+
+---
+
+**Enjoy seamless messaging while coding with Messenger Ax!** 🚀💬
+
