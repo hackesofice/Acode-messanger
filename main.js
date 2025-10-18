@@ -2,7 +2,7 @@
 
 (() => {
     const DEVELOPMENT_MODE = false;
-    const PLUGIN_ID = "hackesofice.messanger_Ax";
+    const PLUGIN_ID = "hackesofice.messanger_ax";
     
     // Acode dependencies
     const editorManager = window.editorManager;

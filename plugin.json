@@ -1,8 +1,8 @@
 {
-  "id":"hackesofice.messanger_Ax",
+  "id":"hackesofice.messanger_ax",
   "name":"Messanger-Ax",
   "main":"main.js",
-  "version":"1.0.1",
+  "version":"1.0.3",
   "readme":"readme.md",
   "icon":"icon.png",
   "files": [],
