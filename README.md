@@ -8,7 +8,7 @@ A feature-rich, real-time messaging plugin for Acode editor that allows you to c
 
 ![Messenger Ax](https://img.shields.io/badge/Acode-Plugin-blue)
 ![Version](https://img.shields.io/badge/Version-1.0.0-green)
-![downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Facode.app%2Fapi%2Fplugin%2Fhackesofice.messanger_Ax&query=downloads&style=for-the-badge&label=Downloads&labelColor=363a4f&color=c084fc&logo=download)
+![downloads](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Facode.app%2Fapi%2Fplugin%2Fhackesofice.messanger_ax&query=downloads&style=for-the-badge&label=Downloads&labelColor=363a4f&color=c084fc&logo=download)
 
 ## BACKEND INFORMATION
 
